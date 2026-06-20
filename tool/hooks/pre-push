@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Pre-push gate. Runs the exact same checks as CI, locally, BEFORE the push
+# leaves your machine. If anything fails, the push is aborted. This is what
+# keeps main always-green in a trunk-based, no-PR workflow.
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+echo "▶ pre-push: resolving workspace..."
+dart pub get
+
+echo "▶ pre-push: checking formatting (strict)..."
+dart format --output none --set-exit-if-changed .
+
+echo "▶ pre-push: analyzing..."
+dart analyze --fatal-infos --fatal-warnings
+
+echo "▶ pre-push: testing every package..."
+for pkg in packages/*/; do
+  if [ -d "${pkg}test" ]; then
+    echo "  == $pkg =="
+    (cd "$pkg" && dart test)
+  fi
+done
+
+echo "✓ pre-push: all checks passed — pushing to main."
