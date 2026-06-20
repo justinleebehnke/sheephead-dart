@@ -3,3 +3,6 @@ build/
 .idea/
 *.iml
 .vscode/
+mutation-test-report/
+**/mutation-test-report/
+*.mutation-test-report
