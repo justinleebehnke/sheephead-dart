@@ -4,7 +4,7 @@ version: 0.1.0
 publish_to: none
 
 environment:
-  sdk: ^3.6.0
+  sdk: ^3.9.0
 
 # Marks this package as a member of the workspace defined at the repo root.
 resolution: workspace

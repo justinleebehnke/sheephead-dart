@@ -16,7 +16,7 @@ jobs:
 
       - uses: dart-lang/setup-dart@v1
         with:
-          sdk: stable
+          sdk: "3.12.2"
 
       - name: Resolve workspace dependencies
         run: dart pub get

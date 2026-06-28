@@ -1,7 +1,7 @@
 name: _sheephead_workspace
 publish_to: none
 environment:
-  sdk: ^3.6.0
+  sdk: ^3.9.0
 workspace:
   - packages/sheephead_engine
   - packages/sheephead_cli
