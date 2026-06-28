@@ -20,7 +20,7 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 
 ## Epic 1 — Cards, deck, and trump (all config-driven)
 
-- [ ] **1.1** `Suit` and `Rank` enums; `Card` immutable value object with value equality.
+- [x] **1.1** `Suit` and `Rank` enums; `Card` immutable value object with value equality.
       *Done when:* `Card(clubs, queen) == Card(clubs, queen)` and they hash equal.
 - [ ] **1.2** `DeckComposition` in `GameConfig`: build a full 32-card deck OR the Spitzer
       26-card deck (remove 7♣ 7♠ 7♥ 8♣ 8♠ 8♥; keep 7♦ 8♦ as diamonds/trump). *Done when:*
