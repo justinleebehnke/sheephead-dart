@@ -56,12 +56,41 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 
 - [ ] **4.1** Pick/pass turn order starting left of dealer. *Done when:* the prompt advances
       correctly and stops on the first pick.
-- [ ] **4.2** All-pass resolution as an injected strategy: `DoublesOnPass` vs `Leaster`
-      (config-selectable). *Done when:* with `DoublesOnPass`, an all-pass hand sets the
-      next hand's multiplier.
-- [ ] **4.3** Escalating doubles tracker: pass again → next *two* hands doubled, and so on;
-      same dealer redeals (configurable). *Done when:* a sequence of all-pass hands produces
-      the documented escalation and the redeal flag is honored.
+
+> All-pass resolution is a richer config axis than "doubles vs leaster" — known real-world
+> resolutions include at least: (1) **misdeal-counts** — no score change, but the hand still
+> consumes a slot in the `Game`'s fixed hand budget, next dealer deals; (2)
+> **redeal-doesn't-count** — same dealer redeals, the failed deal does *not* consume a slot,
+> only the eventual resolved deal does; (3) **Leaster** — the hand is played out under a
+> different win condition (least points among trick-takers, or least points among all
+> players including those with zero tricks), with a configurable tie-break that itself
+> sometimes falls back to (1)'s behavior; (4) **dealer-must-pick** — removes the all-pass
+> branch entirely by forcing a pick, regardless of hand quality; (5) **Doubles** — same as
+> (2) (redeal, doesn't consume a slot), but additionally queues a forward-looking scoring
+> obligation on however many *future, counted* hands it takes to spend, escalating on
+> repeated all-passes. Each strategy should expose two independent properties rather than
+> assume one implies the other: **does this hand consume a counted slot in the `Game`'s
+> fixed budget**, and **what is the scoring effect** (none / Leaster settlement / queued
+> future multiplier). Doubles is the only one of the five with a cross-hand carry-forward
+> obligation — see 4.4.
+
+- [ ] **4.2** `AllPassResolution` strategy interface (config-selectable), each strategy
+      exposing "consumes a counted hand slot?" and "scoring effect" independently, covering
+      at least misdeal-counts, redeal-doesn't-count, Leaster (with a configurable tie-break),
+      dealer-must-pick, and Doubles. *Done when:* each of the five behaves per the note above
+      and is swappable via `GameConfig` alone.
+- [ ] **4.3** Escalating doubles tracker: pass again → next *two* hands doubled, and so on.
+      Same dealer redeals *while the misdeal streak continues*; the moment any hand has a
+      picker, dealer rotation resumes normally and the queued multiplier credit travels by
+      **hand-count, not dealer identity** (confirmed design intent — a dealer is never locked
+      in place to personally clear the credit backlog; see design discussion). *Done when:* a
+      sequence of all-pass hands produces the documented escalation, redeal-during-streak is
+      honored, and a credit queued during one dealer's deal is correctly spent on a
+      later, normally-rotated dealer's hand.
+- [ ] **4.4** *(open question)* Doubles' queued multiplier credit may not be fully spent when
+      a `Game` reaches its final hand. Resolution policy undecided — candidates: forfeit the
+      unspent credit, or carry it forward to a subsequent `Game` via the (parked) `Session`
+      concept. See `Notes / parking lot`.
 
 ## Epic 5 — Bury
 
@@ -111,34 +140,67 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 - [ ] **8.5** "Cut card triggers doubles" optional rule as an injected hook. *Done when:*
       with the rule on and the trigger card cut, the *next* hand is flagged doubled.
 
-## Epic 9 — Terminal play (MVP MILESTONE 🎯)
+## Epic 9 — Game (bounded multi-hand session)
 
-> Goal: sit down and play a full 4-player Spitzer hand in the terminal, one human + three
+> A `Game` is the unit results are compared on, especially for rule-impact experiments and
+> tournament play: a fixed number of rounds, agreed before play begins. A "round" is one
+> full trip around the table — every player deals exactly once — so
+> `roundsPerGame * playerCount = handsPerGame`.
+
+- [ ] **9.1** `Game` requires a round count at creation; derives total hands as
+      `roundsPerGame * playerCount`. *Done when:* constructing a `Game` without a round
+      count is a compile-time error, and a 4-player Game with `roundsPerGame: 20` reports
+      80 total hands.
+- [ ] **9.2** `Game` is immutable once created: no operation extends or shortens its round
+      count afterward. *Done when:* there is no API that mutates a `Game`'s length —
+      wanting more play means constructing a new `Game`, not extending the current one.
+- [ ] **9.3** `Game` aggregates the running tally and doubles/penalty escalation state
+      across its hands (carrying forward what Epic 4's escalation tracker and Epic 8's
+      scoring produce, hand to hand). *Done when:* playing every hand in a `Game` produces
+      one final settlement reflecting every hand's contribution.
+- [ ] **9.4** `Game` reports completion once `handsPerGame` hands have been played, not
+      before or after. *Done when:* a `Game` constructed with N rounds halts at exactly
+      `N * playerCount` hands.
+
+## Epic 10 — Terminal play (MVP MILESTONE 🎯)
+
+> Goal: sit down and play a full 4-player Spitzer `Game` in the terminal, one human + three
 > AI, the way you play King 9 — including your house rules.
 
-- [ ] **9.1** Render a `PlayerView` to the terminal (hand, table, scores). *Done when:*
+- [ ] **10.1** Render a `PlayerView` to the terminal (hand, table, scores). *Done when:*
       a dealt hand prints legibly with trump grouped/sorted.
-- [ ] **9.2** Prompt the human for pick/pass, bury, steal, and each card play; validate
+- [ ] **10.2** Prompt the human for pick/pass, bury, steal, and each card play; validate
       against engine legality. *Done when:* illegal input is re-prompted, never crashes.
-- [ ] **9.3** Drive a complete hand end-to-end (deal → pick → bury → [steal] → tricks →
+- [ ] **10.3** Drive a complete hand end-to-end (deal → pick → bury → [steal] → tricks →
       score) against placeholder AI. *Done when:* one full Spitzer hand plays to settlement
       in the terminal.
-- [ ] **9.4** Hand loop: play consecutive hands, carry the running tally and any
-      doubles/penalty state between them. *Done when:* you can play a short session and quit.
+- [ ] **10.4** Play a full `Game` (the round count agreed at the table) hand-by-hand in the
+      terminal, carrying tally and doubles/penalty state via the `Game` aggregate from
+      Epic 9, and report the final settlement once the agreed rounds are complete.
+      *Done when:* a `Game` constructed with N rounds plays to completion and reports a
+      final result without the player having to decide when to stop.
 
-**🎯 Reaching 9.4 is your first real, playable milestone.**
+**🎯 Reaching 10.4 is your first real, playable milestone.**
 
-## Epic 10 — First AI + the benchmark harness
+## Epic 11 — First AI + the benchmark harness
 
-- [ ] **10.1** `SheepheadAi` interface: `decidePick`, `decideBury`, `decidePlay`,
+> The AI is an **external consumer** of the engine's command/query contract — the same one
+> a human-driven CLI uses — not an engine internal. It reads a `PlayerView` and submits the
+> same commands (pick/pass, bury, steal, play) a human would, with no privileged access to
+> engine internals. This is what makes "every seat is an AI" trivial for large-scale
+> rule-impact experiments.
+
+- [ ] **11.1** `SheepheadAi` interface: `decidePick`, `decideBury`, `decidePlay`,
       (later) `declareSteal`. Separate decision trees for picker-role vs defender-role.
       *Done when:* the terminal game runs with an AI implementing the interface.
-- [ ] **10.2** `RandomAi` — 50/50 legal choices. *Done when:* it can fill all three
+- [ ] **11.2** `RandomAi` — 50/50 legal choices. *Done when:* it can fill all three
       opponent seats and complete hands.
-- [ ] **10.3** Headless simulation runner: play N hands among given AIs with a seeded RNG,
-      collect win rates. *Done when:* 4× `RandomAi` over a large N converges to near-equal
-      win rates (your control baseline).
-- [ ] **10.4** First rules-based decision (e.g., "Keep Stopper" for defenders) behind the
+- [ ] **11.3** Headless simulation runner: play N `Game`s among given AIs with a seeded
+      RNG, collect win rates. *Done when:* 4× `RandomAi` over a large N converges to
+      near-equal win rates (your control baseline), and the runner can compare two
+      `GameConfig` variants (e.g., a rule toggled on vs off) over large N to measure the
+      rule's impact.
+- [ ] **11.4** First rules-based decision (e.g., "Keep Stopper" for defenders) behind the
       `SheepheadAi` interface, with an `explain()` hint string. *Done when:* the rules AI
       beats the random baseline by a statistically clear margin in the sim, AND the same
       rule object can emit a coaching hint in the terminal.
@@ -152,4 +214,11 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 - Replay/analysis tools fall out of `MasterGameState` history "for free" later.
 - Keep a `variants/` folder of named `GameConfig` builders: `spitzer4()`,
   `houseRulesGaylord()`, etc. Your community's rules are just another entry.
+- `PlayerProfile`: cross-game opponent modeling (e.g., "this player picks aggressively"),
+  derived from a completed `Game`'s event history but persisted *outside* the engine
+  (CLI/server territory), not an engine concept. Far-future idea, not blocking current work.
+- `Session`: chains multiple back-to-back `Game`s for a casual table that wants to keep
+  playing past one agreed round count, optionally carrying cumulative tally across
+  `Game`s. Explicitly outside the engine's `Game` abstraction, which stays fixed-length
+  and immutable for comparability. Not designed yet — parked.
   
