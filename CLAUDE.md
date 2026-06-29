@@ -100,6 +100,17 @@ dart analyze --fatal-infos --fatal-warnings           # static analysis; infos a
   master state and derives a per-player view containing only what that player may
   see. A `PlayerView` must never carry another player's concealed cards or the
   blind (except where the rules explicitly allow). Treat a leak here as a bug.
+- **The engine's public surface is commands and events, not method calls into
+  internals.** Clients (CLI, AI, later a server) submit a sealed `Command`,
+  dispatched via an exhaustive `switch` — never a registry/lookup that the compiler
+  can't check for completeness. The engine returns a sealed `CommandResult`:
+  `Accepted(events)` or `Rejected(reason)`. **Never a thrown exception across this
+  boundary** — errors are data, same as everything else here. Accepted `Event`s fold
+  through a pure `apply(state, event) -> state` reducer, so `MasterGameState` is
+  always *derived from* its event history, never separately mutated. Every type that
+  crosses this boundary (`Command`, `Event`, `CommandResult`, `GameConfig`,
+  `PlayerView`) is plain data — no function-typed fields, no behavior crossing the
+  boundary. See `BACKLOG.md` Epic 2.
 
 ---
 
@@ -114,11 +125,24 @@ configuration, not by changing these.
   fail suits (remove 7♣ 7♠ 7♥ 8♣ 8♠ 8♥). 7♦ and 8♦ remain — diamonds are trump.
 - **Spitzer trump order:** the 7♦ is the second-highest card, immediately behind
   the Q♣.
-- **Steal the blind:** after the picker buries and before the first lead, a player
-  may announce a steal. The option may be shown before the bury, but the
-  declaration locks the moment the picker buries, so all players are notified
-  before the first card. Stealing = going alone; the stealer does not see the
-  blind. Configurable on/off.
+- **Partner via Jack of Diamonds:** unless the picker goes alone, their partner is
+  whoever holds the J♦ — unknown to the table until revealed by play. The picker
+  may declare **"chop"** at bury time to decline this partnership and go alone
+  instead. **Illegal to chop while holding J♦ yourself** (there is no partner to
+  cut off, so the announcement would mislead the table into believing one exists
+  elsewhere). **Illegal to bury J♦ without announcing it** (burying it also
+  removes any possible partner, and the table must know). A picker who secretly
+  holds J♦ cannot legally chop and therefore has no way to block a steal —
+  stealing proceeds normally in that case; this is an accepted asymmetry, not a
+  bug.
+- **Steal the blind:** offered only to players who never got a chance to pick —
+  i.e., whoever comes after the picker in the pick/pass turn order (left of
+  dealer → ... → dealer last); if the dealer picked, no one is offered a steal.
+  Never offered at all if the picker declared chop. Offered only after the bury
+  concludes (not before — gated on the chop/J♦ rules above), in turn order
+  starting left of the picker and ending at the dealer; default is decline (no
+  prompt friction); the first player to accept gets it and no one else is asked.
+  Stealing = going alone; the stealer does not see the blind. Configurable on/off.
 - **Doubles on all-pass:** if everyone passes, the hand is doubled; pass again →
   the next two hands are doubled, escalating. Same dealer redeals (configurable).
 - **Cut-card rule:** a designated cut card triggers a round of doubles
@@ -136,6 +160,9 @@ resolution; crack/recrack doublers; bury-legality rules.
 
 - A stable `SheepheadAi` interface: `decidePick`, `decideBury`, `decidePlay`,
   `declareSteal`. Use **separate decision logic for picker-role vs defender-role.**
+  Each method returns the `Command` to submit — the AI is an external
+  command-producer against the same contract as any other client, with no
+  privileged access to engine internals.
 - Implement strategic knowledge as **rule objects that both score a decision and
   can explain themselves**, so the same rule powers AI play and the human coaching
   hint. (Example concept: "keep stopper.")
