@@ -240,7 +240,12 @@ void main() {
 class _FakeCommand implements Command {}
 
 class _FakeGameSession implements GameSession {
-  PlayerView viewResult = PlayerView();
+  PlayerView viewResult = const PlayerView(
+    id: PlayerId(0),
+    hand: [],
+    opponents: [],
+    isMyTurnToAct: false,
+  );
   CommandResult result = const Accepted();
   Command? lastSubmitted;
   final observers = <GameObserver>[];
