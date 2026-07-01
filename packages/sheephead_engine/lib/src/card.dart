@@ -17,6 +17,26 @@ class Card {
   @override
   int get hashCode => Object.hash(suit, rank);
 
+  String get label {
+    final r = switch (rank) {
+      Rank.seven => '7',
+      Rank.eight => '8',
+      Rank.nine => '9',
+      Rank.ten => '10',
+      Rank.jack => 'J',
+      Rank.queen => 'Q',
+      Rank.king => 'K',
+      Rank.ace => 'A',
+    };
+    final s = switch (suit) {
+      Suit.clubs => '♣',
+      Suit.diamonds => '♦',
+      Suit.spades => '♠',
+      Suit.hearts => '♥',
+    };
+    return '$r$s';
+  }
+
   @override
-  String toString() => '$rank of $suit';
+  String toString() => '${rank.name} of ${suit.name}';
 }
