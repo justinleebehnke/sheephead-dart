@@ -33,6 +33,13 @@ class SeatedPlayer {
       other.cardPlayed == cardPlayed;
 
   @override
-  int get hashCode =>
-      Object.hash(id, seat, isPassed, isDealer, isPicker, isGoingAlone, cardPlayed);
+  int get hashCode => Object.hash(
+    id,
+    seat,
+    isPassed,
+    isDealer,
+    isPicker,
+    isGoingAlone,
+    cardPlayed,
+  );
 }
