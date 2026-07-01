@@ -9,29 +9,26 @@ mixin TableLayout {
     final right = view.opponents.firstWhere(
       (o) => o.seat == RelativeSeat.right,
     );
-    return '${center(label(across))}\n\n${leftRight(label(left), label(right))}';
+
+    final buf = StringBuffer();
+    buf.writeln(center(label(across)));
+    if (across.cardPlayed != null) {
+      buf.writeln(center(across.cardPlayed!.label));
+    }
+    buf.writeln();
+    buf.write(leftRight(label(left), label(right)));
+    final leftCard = left.cardPlayed?.label ?? '';
+    final rightCard = right.cardPlayed?.label ?? '';
+    if (leftCard.isNotEmpty || rightCard.isNotEmpty) {
+      buf.writeln();
+      buf.write(leftRight(leftCard, rightCard));
+    }
+    return buf.toString();
   }
 
   String handLine(List<Card> hand) => hand.map((c) => c.label).join(', ');
 
-  String label(SeatedPlayer p) {
-    final buf = StringBuffer('Player ${p.id.value}');
-    if (p.isDealer) buf.write(' (D)');
-    if (p.isStealer) {
-      buf.write(' stole the blind');
-    } else if (p.isRobbed) {
-      buf.write(' picked (ally)');
-    } else if (p.isPicker && p.isGoingAlone) {
-      buf.write(' picked (chop)');
-    } else if (p.isPicker) {
-      buf.write(' picked');
-    } else if (p.isDeclinedSteal) {
-      buf.write(' declined steal');
-    } else if (p.isPassed) {
-      buf.write(' passed');
-    }
-    return buf.toString();
-  }
+  String label(SeatedPlayer p);
 
   String center(String s, {int width = 80}) {
     if (s.length >= width) return s;

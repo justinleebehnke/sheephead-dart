@@ -3,9 +3,10 @@ import 'package:sheephead_engine/sheephead_engine.dart';
 import 'bury_selection.dart';
 import 'game_phase.dart';
 import 'parse_result.dart';
+import 'pick_phase_label.dart';
 import 'table_layout.dart';
 
-class ChopPhase with TableLayout implements GamePhase {
+class ChopPhase with TableLayout, PickPhaseLabel implements GamePhase {
   ChopPhase(this._selection);
 
   final BurySelection _selection;

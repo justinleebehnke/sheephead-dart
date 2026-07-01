@@ -6,6 +6,7 @@ export 'src/command.dart';
 export 'src/decline_steal_command.dart';
 export 'src/pass_command.dart';
 export 'src/pick_command.dart';
+export 'src/play_card_command.dart';
 export 'src/steal_command.dart';
 export 'src/command_result.dart';
 export 'src/player_id.dart';

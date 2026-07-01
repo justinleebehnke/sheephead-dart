@@ -12,5 +12,6 @@ export 'src/pick_pass_phase.dart';
 export 'src/screen_frame.dart';
 export 'src/sheephead_presenter.dart';
 export 'src/steal_phase.dart';
+export 'src/trick_play_phase.dart';
 export 'src/terminal.dart';
 export 'src/terminal_presenter.dart';

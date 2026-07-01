@@ -2,9 +2,10 @@ import 'package:sheephead_engine/sheephead_engine.dart';
 
 import 'game_phase.dart';
 import 'parse_result.dart';
+import 'pick_phase_label.dart';
 import 'table_layout.dart';
 
-class StealPhase with TableLayout implements GamePhase {
+class StealPhase with TableLayout, PickPhaseLabel implements GamePhase {
   @override
   String buildContent(PlayerView view) {
     final buffer = StringBuffer();
