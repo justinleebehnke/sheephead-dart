@@ -6,7 +6,7 @@ import 'game_observer.dart';
 import 'game_phase.dart';
 import 'game_session.dart';
 import 'parse_result.dart';
-import 'screen_template.dart';
+import 'screen_frame.dart';
 import 'terminal_presenter.dart';
 
 typedef PhaseSelector = GamePhase Function(PlayerView view);
@@ -26,7 +26,7 @@ class SheepheadPresenter implements TerminalPresenter, GameObserver {
 
   final GameSession _session;
   final PlayerId _playerId;
-  final ScreenTemplate _layout;
+  final ScreenFrame _layout;
   final PhaseSelector _selector;
   GamePhase _phase;
   final _controller = StreamController<String>();

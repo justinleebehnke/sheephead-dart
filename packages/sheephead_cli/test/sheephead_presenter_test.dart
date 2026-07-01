@@ -6,12 +6,12 @@ import 'package:test/test.dart';
 
 void main() {
   late _FakeGameSession session;
-  late _FakeScreenTemplate layout;
+  late _FakeScreenFrame layout;
   late _FakeGamePhase phase;
 
   setUp(() {
     session = _FakeGameSession();
-    layout = _FakeScreenTemplate();
+    layout = _FakeScreenFrame();
     phase = _FakeGamePhase();
   });
 
@@ -278,7 +278,7 @@ class _FakeGamePhase implements GamePhase {
   String buildContent(PlayerView view) => contentResult;
 }
 
-class _FakeScreenTemplate implements ScreenTemplate {
+class _FakeScreenFrame implements ScreenFrame {
   String? lastContent;
   String? lastError;
   String Function(String content, String? error) outputFor = (content, _) =>

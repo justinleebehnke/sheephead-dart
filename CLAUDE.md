@@ -127,6 +127,28 @@ dart analyze --fatal-infos --fatal-warnings           # static analysis; infos a
 
 ---
 
+## CLI display constraints (named assumptions)
+
+The terminal harness targets a standard **80-column terminal**. This is a
+deliberate, named constraint — not an oversight. Consequences:
+
+- **`GamePhase` implementations own their visual layout.** They format content
+  with 80-column line widths in mind. There is no runtime layout negotiation
+  between `GamePhase` and `ScreenFrame`.
+- **`ScreenFrame` is thin chrome only.** Its job is: ANSI clear-screen, a
+  consistent error zone, and any fixed header/footer. It does not reflow or
+  reposition content.
+- **No dynamic terminal sizing in v1.** If the user's terminal is narrower than
+  80 columns, content may wrap. That is acceptable for the CLI harness. The
+  Flutter app (later) will handle responsive layout properly.
+
+If you find yourself passing terminal dimensions into `GamePhase`, or making
+`ScreenFrame` responsible for spatial layout, stop — the design has drifted from
+these named constraints. Either accept 80 columns or move the discussion to the
+Flutter app layer.
+
+---
+
 ## The configured default variant: 4-player Spitzer
 
 These are the project's house rules — the default `GameConfig`. **Do not
