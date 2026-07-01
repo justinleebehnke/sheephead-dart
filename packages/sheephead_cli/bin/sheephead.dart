@@ -32,4 +32,7 @@ class _EchoPresenter implements TerminalPresenter {
       'You typed: "$line"\n\nType something and press Enter:\n',
     );
   }
+
+  @override
+  void dispose() => _contentController.close();
 }

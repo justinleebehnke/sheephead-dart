@@ -14,6 +14,9 @@ class FakePresenter implements TerminalPresenter {
   @override
   void submitLine(String line) => linesReceived.add(line);
 
+  @override
+  void dispose() {}
+
   void emitContent(String content) => _contentController.add(content);
 }
 

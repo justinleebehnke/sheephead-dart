@@ -100,17 +100,30 @@ dart analyze --fatal-infos --fatal-warnings           # static analysis; infos a
   master state and derives a per-player view containing only what that player may
   see. A `PlayerView` must never carry another player's concealed cards or the
   blind (except where the rules explicitly allow). Treat a leak here as a bug.
-- **The engine's public surface is commands and events, not method calls into
-  internals.** Clients (CLI, AI, later a server) submit a sealed `Command`,
-  dispatched via an exhaustive `switch` — never a registry/lookup that the compiler
-  can't check for completeness. The engine returns a sealed `CommandResult`:
-  `Accepted(events)` or `Rejected(reason)`. **Never a thrown exception across this
-  boundary** — errors are data, same as everything else here. Accepted `Event`s fold
-  through a pure `apply(state, event) -> state` reducer, so `MasterGameState` is
-  always *derived from* its event history, never separately mutated. Every type that
-  crosses this boundary (`Command`, `Event`, `CommandResult`, `GameConfig`,
-  `PlayerView`) is plain data — no function-typed fields, no behavior crossing the
-  boundary. See `BACKLOG.md` Epic 2.
+- **The engine's public surface is commands, results, and views — not internal
+  events.** Clients (CLI, AI, later a server) submit a sealed `Command`, dispatched
+  via an exhaustive `switch` — never a registry/lookup that the compiler can't check
+  for completeness. The engine returns a sealed `CommandResult`: `Accepted()` or
+  `Rejected(reason)`. **Never a thrown exception across this boundary** — errors are
+  data, same as everything else here. Internally, `Event`s fold through a pure
+  `apply(state, event) -> state` reducer so `MasterGameState` is always *derived
+  from* its event history, never separately mutated — but `Event` is engine-private
+  and never crosses the boundary. Clients observe state changes by implementing
+  `GameObserver.onChanged()` and pull their view via `GameSession.viewFor(PlayerId)`.
+  Every type that crosses this boundary (`Command`, `CommandResult`, `GameConfig`,
+  `PlayerView`, `PlayerId`) is plain data — no function-typed fields, no behavior
+  crossing the boundary. See `BACKLOG.md` Epic 2.
+- **The engine is a pure state machine; it has no notion of waiting.** The engine
+  is the accumulated result of all events applied so far. It cannot produce new
+  events until a `Command` is submitted — not because it is "blocked," but because
+  there is nothing to process. Both AI and UI are external producers of `Command`s
+  and `GameObserver` implementors — neither has privileged access to engine
+  internals. Display pacing (delays between events, holding the screen at
+  trick-end until the human presses Enter) is a UI concern, not an engine concern.
+  The distinction matters: an **action pause** (the engine requires a `Command`
+  before it can produce more events) is a game-state dependency; a **display pause**
+  (UI waiting for the human to acknowledge a completed trick) is purely
+  presentational and must not affect the engine or other players.
 
 ---
 

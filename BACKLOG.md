@@ -36,12 +36,14 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 
 > This epic introduces the engine's public contract, which every later epic (picking,
 > bury, steal, trick play) reuses: clients submit a sealed `Command`, dispatched via an
-> exhaustive `switch`; the engine returns a sealed `CommandResult` — `Accepted(events)` or
-> `Rejected(reason)` — never an exception, across this boundary. Accepted `Event`s fold
-> through a pure `apply(state, event) -> state` reducer, so `MasterGameState` is always
-> *derived from* its event history, not separately mutated. A CLI-driven human and an AI
-> (Epic 12) are both just command-producers against this same contract — Deal is simply
-> the first command to flow through it. See `CLAUDE.md`'s engine-contract invariant.
+> exhaustive `switch`; the engine returns a sealed `CommandResult` — `Accepted()` or
+> `Rejected(reason)` — never an exception, across this boundary. Internally, `Event`s fold
+> through a pure `apply(state, event) -> state` reducer so `MasterGameState` is always
+> *derived from* its event history, not separately mutated — but `Event` is engine-private.
+> Clients observe changes via `GameObserver.onChanged()` and read state via
+> `GameSession.viewFor(PlayerId)`. A CLI-driven human and an AI (Epic 12) are both just
+> command-producers against this same contract — Deal is simply the first command to flow
+> through it. See `CLAUDE.md`'s engine-contract invariant.
 
 - [ ] **2.1** Outside-in: write a failing test that submits a `Deal` command (a config +
       a seeded shuffler) and asserts on the resulting `PlayerView`s — hand sizes, blind
@@ -289,15 +291,60 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
       `explain()` hint string.
 - [ ] **13.7** End-of-hand screen shows both this hand's point swing and the cumulative
       running tally across the `Game`. Settlement is zero-sum across players.
-- [ ] **13.8** Advance to the next hand via Enter (not literal spacebar/raw-mode input,
-      to avoid needing raw terminal mode in Dart). *Done when:* pressing Enter after a
-      settlement screen starts the next hand.
-- [ ] **13.9** When the `Game` completes (Epic 10.4), the CLI prints the final settlement
+- [ ] **13.8** After each trick completes, hold the screen showing all four played
+      cards and who won, waiting for the human to press Enter before advancing to the
+      next lead. The engine has already moved on — this is a display pause in the UI,
+      not an engine pause. AI players do not pause. *Done when:* the trick result is
+      visible after every trick and input is required before the next lead prompt
+      appears.
+- [ ] **13.9** Advance to the next hand via Enter after the settlement screen (not
+      literal spacebar/raw-mode input, to avoid needing raw terminal mode in Dart).
+      *Done when:* pressing Enter after a settlement screen starts the next hand.
+- [ ] **13.10** When the `Game` completes (Epic 10.4), the CLI prints the final settlement
       and exits — no offer to start a new `Game` automatically.
 
 ---
 
 ## Notes / parking lot
+
+### Per-player UI preferences (tabled, not in scope yet)
+
+Distinct from `GameConfig` (which governs rules for all players equally), each
+player has personal display preferences that affect only their own view. Two
+categories:
+
+**Cosmetic / pacing:**
+- Delay between events (0 = instant, N seconds = animated); used when events
+  arrive faster than the player wants to read them.
+- Manual advance at trick-end (press Enter) vs. auto-advance after a fixed
+  delay.
+- Card sort order, color scheme, font size (future app concern).
+
+**Informational overlays** (some can be locked off by the host for fairness):
+- Running point totals per player/team after each trick.
+- Trump counter: how many trump have been played / how many remain.
+- Boss-card indicator: which card currently wins if led.
+- AI coaching hints: "this card is likely to take the trick" etc.
+- Partner-reveal hints (who probably holds J♦ based on play so far).
+
+**Host-level gating:** A game host may disable specific overlays globally
+(e.g., no coaching hints in a competitive game) regardless of individual
+preference. Individual preferences apply only within what the host permits.
+
+Design note: these preferences live outside `GameConfig` and outside the
+engine entirely. The CLI/app layer owns them. The engine's `PlayerView`
+provides the raw data; the UI layer decides what derived information to surface
+and how.
+
+### Display pacing / view buffer (tabled)
+
+When `GameObserver.onChanged()` fires faster than the UI wants to show each
+state (e.g., three AI plays in rapid succession), the presenter needs an
+internal buffer of `PlayerView` snapshots — one captured per `onChanged()` call
+— that it replays at the player's configured rate rather than rendering them all
+at once. The trick-end manual-advance (BACKLOG 13.8) is the simplest form of
+this; a timed delay between snapshots is a generalization. Design this when
+implementing 13.8.
 
 - 5-player online with the dealer sitting out → a `seating`/`dealerPlays` config concern;
   design `GameConfig` so this is data, not a new code path.
