@@ -10,6 +10,7 @@ export 'src/play_card_command.dart';
 export 'src/steal_command.dart';
 export 'src/command_result.dart';
 export 'src/player_id.dart';
+export 'src/player_score.dart';
 export 'src/player_view.dart';
 export 'src/relative_seat.dart';
 export 'src/seated_player.dart';
