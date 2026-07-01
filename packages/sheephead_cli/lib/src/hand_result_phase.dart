@@ -15,9 +15,13 @@ class HandResultPhase with TableLayout, TrickPhaseLabel implements GamePhase {
 
     final results = view.handResults;
     if (results != null && results.isNotEmpty) {
-      final labels = results.map((s) => s.id == view.id
-          ? _selfLabel(view)
-          : label(view.opponents.firstWhere((o) => o.id == s.id))).toList();
+      final labels = results
+          .map(
+            (s) => s.id == view.id
+                ? _selfLabel(view)
+                : label(view.opponents.firstWhere((o) => o.id == s.id)),
+          )
+          .toList();
 
       final maxLabelLen = labels.fold(0, (m, l) => l.length > m ? l.length : m);
 
