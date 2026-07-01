@@ -1,5 +1,6 @@
 library;
 
+export 'src/bury_command.dart';
 export 'src/card.dart';
 export 'src/command.dart';
 export 'src/pass_command.dart';

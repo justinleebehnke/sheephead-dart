@@ -1,10 +1,15 @@
 import 'package:sheephead_engine/sheephead_engine.dart';
 
+import 'bury_selection.dart';
 import 'game_phase.dart';
 import 'parse_result.dart';
 import 'table_layout.dart';
 
-class PickPassPhase with TableLayout implements GamePhase {
+class ChopPhase with TableLayout implements GamePhase {
+  ChopPhase(this._selection);
+
+  final BurySelection _selection;
+
   @override
   String buildContent(PlayerView view) {
     final buffer = StringBuffer();
@@ -17,19 +22,20 @@ class PickPassPhase with TableLayout implements GamePhase {
       buffer.writeln();
     }
 
-    buffer.write(center('Would you like to pick? [y/N]'));
+    buffer.write(center('Would you like to chop (go alone)? [y/N]'));
 
     return buffer.toString();
   }
 
   @override
   ParseResult interpret(String input) {
+    final cards = _selection.cards!;
     switch (input.trim().toLowerCase()) {
       case 'y':
-        return const Submit(PickCommand());
+        return Submit(BuryCommand(cards: cards, chop: true));
       case 'n':
       case '':
-        return const Submit(PassCommand());
+        return Submit(BuryCommand(cards: cards, chop: false));
       default:
         return const Unrecognized();
     }

@@ -1,6 +1,9 @@
 library;
 
 export 'src/ansi_screen_frame.dart';
+export 'src/bury_phase.dart';
+export 'src/bury_selection.dart';
+export 'src/chop_phase.dart';
 export 'src/game_observer.dart';
 export 'src/game_phase.dart';
 export 'src/game_session.dart';
