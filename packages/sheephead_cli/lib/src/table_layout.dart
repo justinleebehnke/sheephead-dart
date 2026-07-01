@@ -17,7 +17,19 @@ mixin TableLayout {
   String label(SeatedPlayer p) {
     final buf = StringBuffer('Player ${p.id.value}');
     if (p.isDealer) buf.write(' (D)');
-    if (p.isPassed) buf.write(' passed');
+    if (p.isStealer) {
+      buf.write(' stole the blind');
+    } else if (p.isRobbed) {
+      buf.write(' picked (ally)');
+    } else if (p.isPicker && p.isGoingAlone) {
+      buf.write(' picked (chop)');
+    } else if (p.isPicker) {
+      buf.write(' picked');
+    } else if (p.isDeclinedSteal) {
+      buf.write(' declined steal');
+    } else if (p.isPassed) {
+      buf.write(' passed');
+    }
     return buf.toString();
   }
 

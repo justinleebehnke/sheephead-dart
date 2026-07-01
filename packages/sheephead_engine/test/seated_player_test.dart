@@ -160,4 +160,55 @@ void main() {
       ),
     );
   });
+
+  test('seated players differ when isDeclinedSteal differs', () {
+    expect(
+      player,
+      isNot(
+        const SeatedPlayer(
+          id: PlayerId(1),
+          seat: RelativeSeat.left,
+          isPassed: false,
+          isDealer: false,
+          isPicker: false,
+          isGoingAlone: false,
+          isDeclinedSteal: true,
+        ),
+      ),
+    );
+  });
+
+  test('seated players differ when isStealer differs', () {
+    expect(
+      player,
+      isNot(
+        const SeatedPlayer(
+          id: PlayerId(1),
+          seat: RelativeSeat.left,
+          isPassed: false,
+          isDealer: false,
+          isPicker: false,
+          isGoingAlone: false,
+          isStealer: true,
+        ),
+      ),
+    );
+  });
+
+  test('seated players differ when isRobbed differs', () {
+    expect(
+      player,
+      isNot(
+        const SeatedPlayer(
+          id: PlayerId(1),
+          seat: RelativeSeat.left,
+          isPassed: false,
+          isDealer: false,
+          isPicker: false,
+          isGoingAlone: false,
+          isRobbed: true,
+        ),
+      ),
+    );
+  });
 }

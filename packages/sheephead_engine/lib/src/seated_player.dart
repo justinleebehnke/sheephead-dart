@@ -10,6 +10,9 @@ class SeatedPlayer {
     required this.isDealer,
     required this.isPicker,
     required this.isGoingAlone,
+    this.isDeclinedSteal = false,
+    this.isStealer = false,
+    this.isRobbed = false,
     this.cardPlayed,
   });
 
@@ -19,6 +22,9 @@ class SeatedPlayer {
   final bool isDealer;
   final bool isPicker;
   final bool isGoingAlone;
+  final bool isDeclinedSteal;
+  final bool isStealer;
+  final bool isRobbed;
   final Card? cardPlayed;
 
   @override
@@ -30,6 +36,9 @@ class SeatedPlayer {
       other.isDealer == isDealer &&
       other.isPicker == isPicker &&
       other.isGoingAlone == isGoingAlone &&
+      other.isDeclinedSteal == isDeclinedSteal &&
+      other.isStealer == isStealer &&
+      other.isRobbed == isRobbed &&
       other.cardPlayed == cardPlayed;
 
   @override
@@ -40,6 +49,9 @@ class SeatedPlayer {
     isDealer,
     isPicker,
     isGoingAlone,
+    isDeclinedSteal,
+    isStealer,
+    isRobbed,
     cardPlayed,
   );
 }
