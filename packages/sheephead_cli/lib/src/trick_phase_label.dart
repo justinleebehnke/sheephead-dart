@@ -14,6 +14,8 @@ mixin TrickPhaseLabel {
       } else {
         buf.write(' picked');
       }
+    } else if (p.isPartner) {
+      buf.write(' (partner)');
     }
     return buf.toString();
   }

@@ -14,6 +14,7 @@ void main() {
     bool isIPicker = false,
     bool isIDealer = false,
     bool isIGoingAlone = false,
+    bool isIPartner = false,
   }) => PlayerView(
     id: const PlayerId(0),
     hand: const [],
@@ -47,6 +48,7 @@ void main() {
     isIPicker: isIPicker,
     isIDealer: isIDealer,
     isIGoingAlone: isIGoingAlone,
+    isIPartner: isIPartner,
     phase: HandResultPhaseView(results: results ?? const []),
   );
 
@@ -187,6 +189,18 @@ void main() {
         ),
       );
       expect(content, isNot(contains('Player 0 picked')));
+    });
+
+    test('shows partner label when I am the revealed partner', () {
+      final content = phase.buildContent(
+        makeView(
+          isIPartner: true,
+          results: [
+            const PlayerScore(id: PlayerId(0), handPoints: 3, runningTotal: 3),
+          ],
+        ),
+      );
+      expect(content, contains('Player 0 (partner)'));
     });
 
     test('shows chop label when I am the picker going alone', () {

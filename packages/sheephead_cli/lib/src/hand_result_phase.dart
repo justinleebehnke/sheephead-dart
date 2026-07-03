@@ -55,6 +55,8 @@ class HandResultPhase with TableLayout, TrickPhaseLabel implements GamePhase {
       } else {
         buf.write(' picked');
       }
+    } else if (view.isIPartner) {
+      buf.write(' (partner)');
     }
     return buf.toString();
   }

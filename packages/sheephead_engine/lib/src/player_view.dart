@@ -10,9 +10,11 @@ class PlayerView {
     required this.opponents,
     required this.isMyTurnToAct,
     required this.phase,
+    this.isDoublesHand = false,
     this.isIDealer = false,
     this.isIPicker = false,
     this.isIGoingAlone = false,
+    this.isIPartner = false,
   });
 
   final PlayerId id;
@@ -22,7 +24,9 @@ class PlayerView {
 
   final bool isMyTurnToAct;
   final PhaseView phase;
+  final bool isDoublesHand;
   final bool isIDealer;
   final bool isIPicker;
   final bool isIGoingAlone;
+  final bool isIPartner;
 }

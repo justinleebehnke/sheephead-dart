@@ -248,6 +248,30 @@ void main() {
       expect(content, contains('Player 2 picked (ally)'));
     });
 
+    test('labels the revealed partner', () {
+      final content = phase.buildContent(
+        viewWithOpponents(
+          across: const SeatedPlayer(
+            id: PlayerId(2),
+            seat: RelativeSeat.across,
+            isPassed: false,
+            isDealer: false,
+            isPicker: false,
+            isGoingAlone: false,
+            isPartner: true,
+          ),
+        ),
+      );
+
+      expect(content, contains('Player 2 (partner)'));
+    });
+
+    test('does not label a non-partner as partner', () {
+      final content = phase.buildContent(viewWithOpponents());
+
+      expect(content, isNot(contains('(partner)')));
+    });
+
     test('labels the stealer', () {
       final content = phase.buildContent(
         viewWithOpponents(

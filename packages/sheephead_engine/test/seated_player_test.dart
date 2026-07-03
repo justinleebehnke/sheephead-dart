@@ -211,4 +211,21 @@ void main() {
       ),
     );
   });
+
+  test('seated players differ when isPartner differs', () {
+    expect(
+      player,
+      isNot(
+        const SeatedPlayer(
+          id: PlayerId(1),
+          seat: RelativeSeat.left,
+          isPassed: false,
+          isDealer: false,
+          isPicker: false,
+          isGoingAlone: false,
+          isPartner: true,
+        ),
+      ),
+    );
+  });
 }

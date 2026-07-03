@@ -15,6 +15,7 @@ void main() {
     bool leftDealer = false,
     bool acrossDealer = false,
     bool rightDealer = false,
+    bool isDoublesHand = false,
   }) => PlayerView(
     id: const PlayerId(0),
     hand: hand,
@@ -45,6 +46,7 @@ void main() {
       ),
     ],
     isMyTurnToAct: true,
+    isDoublesHand: isDoublesHand,
     phase: const PickPhaseView(),
   );
 
@@ -55,6 +57,17 @@ void main() {
       expect(content, contains('Player 1'));
       expect(content, contains('Player 2'));
       expect(content, contains('Player 3'));
+    });
+
+    test('shows a doubles banner when the hand is doubled', () {
+      expect(
+        phase.buildContent(makeView(isDoublesHand: true)),
+        contains('*** DOUBLES HAND ***'),
+      );
+    });
+
+    test('omits the doubles banner on a normal hand', () {
+      expect(phase.buildContent(makeView()), isNot(contains('DOUBLES HAND')));
     });
 
     test('shows across player above left and right players', () {

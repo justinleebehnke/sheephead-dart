@@ -13,6 +13,7 @@ class SeatedPlayer {
     this.isDeclinedSteal = false,
     this.isStealer = false,
     this.isRobbed = false,
+    this.isPartner = false,
     this.cardPlayed,
   });
 
@@ -25,6 +26,7 @@ class SeatedPlayer {
   final bool isDeclinedSteal;
   final bool isStealer;
   final bool isRobbed;
+  final bool isPartner;
   final Card? cardPlayed;
 
   @override
@@ -39,6 +41,7 @@ class SeatedPlayer {
       other.isDeclinedSteal == isDeclinedSteal &&
       other.isStealer == isStealer &&
       other.isRobbed == isRobbed &&
+      other.isPartner == isPartner &&
       other.cardPlayed == cardPlayed;
 
   @override
@@ -52,6 +55,7 @@ class SeatedPlayer {
     isDeclinedSteal,
     isStealer,
     isRobbed,
+    isPartner,
     cardPlayed,
   );
 }

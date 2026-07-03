@@ -11,6 +11,10 @@ mixin TableLayout {
     );
 
     final buf = StringBuffer();
+    if (view.isDoublesHand) {
+      buf.writeln(center('*** DOUBLES HAND ***'));
+      buf.writeln();
+    }
     buf.writeln(center(label(across)));
     if (across.cardPlayed != null) {
       buf.writeln(center(across.cardPlayed!.label));
