@@ -42,29 +42,38 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 > *derived from* its event history, not separately mutated — but `Event` is engine-private.
 > Clients observe changes via `GameObserver.onChanged()` and read state via
 > `GameSession.viewFor(PlayerId)`. A CLI-driven human and an AI (Epic 12) are both just
-> command-producers against this same contract — Deal is simply the first command to flow
-> through it. See `CLAUDE.md`'s engine-contract invariant.
+> command-producers against this same contract. There is no `Deal` command — dealing is
+> triggered automatically on construction: `SheepheadGameSession(config, shuffler)` deals
+> immediately and rests at the first `Pick` phase. After each hand the engine auto-deals the
+> next unless the session has reached its configured hand count, at which point it emits
+> `GameResultPhaseView` and halts. See `CLAUDE.md`'s engine-contract invariant.
+> Note: `GameSession` and `GameObserver` are the engine's public boundary; they must live in
+> `sheephead_engine`, not `sheephead_cli` (where they currently reside as stubs).
 
-- [ ] **2.1** Outside-in: write a failing test that submits a `Deal` command (a config +
-      a seeded shuffler) and asserts on the resulting `PlayerView`s — hand sizes, blind
-      size, all cards accounted for, no duplicates — via the `CommandResult`, never by
-      reaching into engine internals directly. *Done when:* the test exists and fails
-      (most likely on missing types at first, since `Command`/`Event`/`CommandResult`
-      don't exist yet).
-- [ ] **2.2** Minimal `Command` / `Event` / `CommandResult` sealed-class skeleton — just
-      enough surface (`Deal`, `HandDealt`, `Accepted`/`Rejected`) for 2.1 to compile.
-      *Done when:* 2.1 compiles and fails on an assertion, not on a missing type.
+- [ ] **2.1** Outside-in: write a failing test that constructs
+      `SheepheadGameSession(GameConfig.spitzer4(), Shuffler(Random(seed)))` and asserts on
+      the immediate `viewFor(playerId)` results — four 6-card hands, 2-card blind hidden,
+      all 26 cards accounted for, no duplicates, phase is `PickPhaseView` with the correct
+      player to act — never by reaching into engine internals directly. *Done when:* the
+      test exists and fails (most likely on missing types at first).
+- [ ] **2.2** Minimal skeleton — just enough for 2.1 to compile: move `GameSession` and
+      `GameObserver` from `sheephead_cli` into `sheephead_engine`; add `GameConfig` (at
+      minimum: `playerCount`, `handSize`, `blindSize`, `roundsPerGame`) and a
+      `SheepheadGameSession` class stub. *Done when:* 2.1 compiles and fails on an
+      assertion, not on a missing type.
 - [ ] **2.3** `Shuffler` wrapping an injected `Random`. *Done when:* same seed → same order;
       different seed → (almost always) different order.
-- [ ] **2.4** `Deal` command handler — `(state, Deal) -> Rejected | [HandDealt]` — sized
-      from config, reusing Epic 1.2's `DeckComposition`. *Done when:* a 4-player Spitzer
-      deal yields four 6-card hands and a 2-card blind, all 26 cards accounted for, no
-      duplicates.
+- [ ] **2.4** Session construction deals: build deck from `GameConfig` (reusing Epic 1.2's
+      `DeckComposition`), shuffle with the injected `Shuffler`, distribute hands and blind,
+      fold `HandDealt` event(s) through `apply`, and rest at the first `PickPhaseView`.
+      *Done when:* a 4-player Spitzer session yields four 6-card hands and a 2-card blind,
+      all 26 cards accounted for, no duplicates.
 - [ ] **2.5** `apply(state, HandDealt)` reducer + `deriveView(state, playerId)`, enough for
-      2.1's `PlayerView` assertions to pass. *Done when:* 2.1 is green.
+      2.1's `viewFor()` assertions to pass. *Done when:* 2.1 is green.
 - [ ] **2.6** Config validation: deck size must equal `players * handSize + blindSize`.
-      *Done when:* an inconsistent config produces a `Rejected` `CommandResult` with a
-      typed reason at `Deal` time (not a thrown exception, per the error-shape decision).
+      *Done when:* an inconsistent `GameConfig` is rejected at construction time with a
+      clear error (invalid config is a programming error — a thrown `ArgumentError` at the
+      constructor is appropriate here, unlike game-state errors which are `Rejected` results).
 
 ## Epic 3 — Game state and hidden information
 
@@ -83,7 +92,7 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 
 > All-pass resolution is a richer config axis than "doubles vs leaster" — known real-world
 > resolutions include at least: (1) **misdeal-counts** — no score change, but the hand still
-> consumes a slot in the `Game`'s fixed hand budget, next dealer deals; (2)
+> consumes a slot in the session's fixed hand budget, next dealer deals; (2)
 > **redeal-doesn't-count** — same dealer redeals, the failed deal does *not* consume a slot,
 > only the eventual resolved deal does; (3) **Leaster** — the hand is played out under a
 > different win condition (least points among trick-takers, or least points among all
@@ -93,8 +102,8 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 > (2) (redeal, doesn't consume a slot), but additionally queues a forward-looking scoring
 > obligation on however many *future, counted* hands it takes to spend, escalating on
 > repeated all-passes. Each strategy should expose two independent properties rather than
-> assume one implies the other: **does this hand consume a counted slot in the `Game`'s
-> fixed budget**, and **what is the scoring effect** (none / Leaster settlement / queued
+> assume one implies the other: **does this hand consume a counted slot in the session's
+> fixed hand budget**, and **what is the scoring effect** (none / Leaster settlement / queued
 > future multiplier). Doubles is the only one of the five with a cross-hand carry-forward
 > obligation — see 4.4.
 
@@ -112,9 +121,9 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
       honored, and a credit queued during one dealer's deal is correctly spent on a
       later, normally-rotated dealer's hand.
 - [ ] **4.4** *(open question)* Doubles' queued multiplier credit may not be fully spent when
-      a `Game` reaches its final hand. Resolution policy undecided — candidates: forfeit the
-      unspent credit, or carry it forward to a subsequent `Game` via the (parked) `Session`
-      concept. See `Notes / parking lot`.
+      the session reaches its final hand. Resolution policy undecided — candidates: forfeit
+      the unspent credit, or carry it forward to a subsequent session via the (parked)
+      `Session` concept. See `Notes / parking lot`.
 
 ## Epic 5 — Bury
 
@@ -212,27 +221,27 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 - [ ] **9.5** "Cut card triggers doubles" optional rule as an injected hook. *Done when:*
       with the rule on and the trigger card cut, the *next* hand is flagged doubled.
 
-## Epic 10 — Game (bounded multi-hand session)
+## Epic 10 — Bounded multi-hand session
 
-> A `Game` is the unit results are compared on, especially for rule-impact experiments and
-> tournament play: a fixed number of rounds, agreed before play begins. A "round" is one
-> full trip around the table — every player deals exactly once — so
-> `roundsPerGame * playerCount = handsPerGame`.
+> A session is bounded: a fixed number of rounds, agreed before play begins via
+> `GameConfig.roundsPerGame`. A "round" is one full trip around the table — every player
+> deals exactly once — so `roundsPerGame * playerCount = handsPerGame`. There is no
+> separate `Game` class; `GameSession` owns all of this tracking internally.
 
-- [ ] **10.1** `Game` requires a round count at creation; derives total hands as
-      `roundsPerGame * playerCount`. *Done when:* constructing a `Game` without a round
-      count is a compile-time error, and a 4-player Game with `roundsPerGame: 20` reports
-      80 total hands.
-- [ ] **10.2** `Game` is immutable once created: no operation extends or shortens its round
-      count afterward. *Done when:* there is no API that mutates a `Game`'s length —
-      wanting more play means constructing a new `Game`, not extending the current one.
-- [ ] **10.3** `Game` aggregates the running tally and doubles/penalty escalation state
+- [ ] **10.1** `GameConfig` requires `roundsPerGame`; the session derives total hands as
+      `roundsPerGame * playerCount`. *Done when:* a 4-player session with
+      `roundsPerGame: 20` tracks a budget of 80 hands.
+- [ ] **10.2** The hand budget is fixed at construction time via the immutable `GameConfig`
+      — no operation extends or shortens it afterward. *Done when:* there is no API that
+      mutates the session's hand count after construction.
+- [ ] **10.3** The session aggregates the running tally and doubles/penalty escalation state
       across its hands (carrying forward what Epic 4's escalation tracker and Epic 9's
-      scoring produce, hand to hand). *Done when:* playing every hand in a `Game` produces
+      scoring produce, hand to hand). *Done when:* playing every hand in a session produces
       one final settlement reflecting every hand's contribution.
-- [ ] **10.4** `Game` reports completion once `handsPerGame` hands have been played, not
-      before or after. *Done when:* a `Game` constructed with N rounds halts at exactly
-      `N * playerCount` hands.
+- [ ] **10.4** The session auto-deals the next hand after each `HandResult`; once
+      `handsPerGame` hands have been played it emits `GameResultPhaseView` and halts —
+      no further commands are accepted. *Done when:* a session configured for N rounds
+      plays exactly `N * playerCount` hands and ends.
 
 ## Epic 11 — Terminal play (MVP MILESTONE 🎯)
 
@@ -247,11 +256,11 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 - [ ] **11.3** Drive a complete hand end-to-end (deal → pick → bury → [steal] → tricks →
       score) against placeholder AI. *Done when:* one full Spitzer hand plays to settlement
       in the terminal.
-- [ ] **11.4** Play a full `Game` (the round count agreed at the table) hand-by-hand in the
-      terminal, carrying tally and doubles/penalty state via the `Game` aggregate from
-      Epic 10, and report the final settlement once the agreed rounds are complete.
-      *Done when:* a `Game` constructed with N rounds plays to completion and reports a
-      final result without the player having to decide when to stop.
+- [ ] **11.4** Play a full session (the round count fixed in `GameConfig`) hand-by-hand in
+      the terminal; the engine carries tally and doubles/penalty state internally (Epic 10)
+      and emits `GameResultPhaseView` once the agreed rounds are complete.
+      *Done when:* a session configured for N rounds plays to completion and the CLI reports
+      the final result without the player having to decide when to stop.
 
 **🎯 Reaching 11.4 is your first real, playable milestone.**
 
@@ -268,8 +277,8 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
       *Done when:* the terminal game runs with an AI implementing the interface.
 - [ ] **12.2** `RandomAi` — 50/50 legal choices. *Done when:* it can fill all three
       opponent seats and complete hands.
-- [ ] **12.3** Headless simulation runner: play N `Game`s among given AIs with a seeded
-      RNG, collect win rates. *Done when:* 4× `RandomAi` over a large N converges to
+- [ ] **12.3** Headless simulation runner: construct N `GameSession`s among given AIs with a
+      seeded RNG, collect win rates. *Done when:* 4× `RandomAi` over a large N converges to
       near-equal win rates (your control baseline), and the runner can compare two
       `GameConfig` variants (e.g., a rule toggled on vs off) over large N to measure the
       rule's impact.
@@ -283,7 +292,7 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 > Captured from CLI-design discussion, ahead of full implementation in Epic 11.
 
 - [ ] **13.1** Session config is hardcoded for v1 (a single `GameConfig`, fixed round
-      count) — no file loading yet. *Done when:* the CLI starts a `Game` with no
+      count) — no file loading yet. *Done when:* the CLI constructs a `GameSession` with no
       user-supplied configuration at all.
 - [ ] **13.2** *(deferred, not v1)* Load `GameConfig` from a JSON/YAML file, selectable via
       a CLI flag, so more than one config can be used. Parked until after the MVP milestone.
@@ -297,7 +306,7 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 - [ ] **13.6** No coaching/hints in the CLI MVP. Parked for later, alongside Epic 12.4's
       `explain()` hint string.
 - [ ] **13.7** End-of-hand screen shows both this hand's point swing and the cumulative
-      running tally across the `Game`. Settlement is zero-sum across players.
+      running tally across the session. Settlement is zero-sum across players.
 - [ ] **13.8** After each trick completes, hold the screen showing all four played
       cards and who won, waiting for the human to press Enter before advancing to the
       next lead. The engine has already moved on — this is a display pause in the UI,
@@ -307,8 +316,8 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 - [ ] **13.9** Advance to the next hand via Enter after the settlement screen (not
       literal spacebar/raw-mode input, to avoid needing raw terminal mode in Dart).
       *Done when:* pressing Enter after a settlement screen starts the next hand.
-- [ ] **13.10** When the `Game` completes (Epic 10.4), the CLI prints the final settlement
-      and exits — no offer to start a new `Game` automatically.
+- [ ] **13.10** When the session completes (Epic 10.4), the CLI prints the final settlement
+      and exits — no offer to start a new session automatically.
 
 ---
 
@@ -359,9 +368,8 @@ implementing 13.8.
 - Keep a `variants/` folder of named `GameConfig` builders: `spitzer4()`,
   `houseRulesGaylord()`, etc. Your community's rules are just another entry.
 - `PlayerProfile`: cross-game opponent modeling (e.g., "this player picks aggressively"),
-  derived from a completed `Game`'s event history but persisted *outside* the engine
+  derived from a completed session's event history but persisted *outside* the engine
   (CLI/server territory), not an engine concept. Far-future idea, not blocking current work.
-- `Session`: chains multiple back-to-back `Game`s for a casual table that wants to keep
-  playing past one agreed round count, optionally carrying cumulative tally across
-  `Game`s. Explicitly outside the engine's `Game` abstraction, which stays fixed-length
-  and immutable for comparability. Not designed yet — parked.
+- `Session`: chains multiple back-to-back bounded sessions for a casual table that wants to
+  keep playing past one agreed round count, optionally carrying cumulative tally forward.
+  Not designed yet — parked.
