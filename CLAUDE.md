@@ -138,6 +138,22 @@ dart analyze --fatal-infos --fatal-warnings           # static analysis; infos a
   before it can produce more events) is a game-state dependency; a **display pause**
   (UI waiting for the human to acknowledge a completed trick) is purely
   presentational and must not affect the engine or other players.
+- **Result phases are transient snapshots the engine passes *through*, never
+  acknowledgment gates.** One `Command` can drive a *sequence* of view snapshots:
+  the engine folds all consequent events and emits a snapshot at each meaningful
+  state it moves through — including the "result" phases (`TrickResult`,
+  `HandResult`, the doubled-redeal `AllPass`) — then rests at the next genuine
+  decision point (the next action pause). There is **no** continue/acknowledge
+  `Command`: leaving a result phase is not gated on input, which is exactly why
+  "the engine has already moved on" holds and why **AI never pauses** (it reacts
+  only to snapshots where it must act, ignoring result frames). The *human* client
+  gets its pacing by **buffering the snapshot stream** in the presenter — holding a
+  result frame on screen until the player presses Enter, then revealing the next
+  buffered frame. So e.g. playing the 4th card of a trick emits a `TrickResult`
+  snapshot and then the next `TrickPlay` (or `HandResult` → auto-dealt next
+  `Pick`) snapshot; the engine rests only at the next lead/decision, and the
+  presenter paces the frames between. This buffering is a UI-layer concern; the
+  engine and AI are unaffected.
 
 ---
 

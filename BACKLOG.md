@@ -182,6 +182,13 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 
 ## Epic 8 — Trick play
 
+> This is where the transient-result-snapshot rule first bites (see `CLAUDE.md`'s
+> "Result phases are transient snapshots" invariant): completing a trick emits a
+> `TrickResult` snapshot and then the next `TrickPlay`/`HandResult` snapshot, with
+> no acknowledge `Command` — the engine rests only at the next lead. Trick-end
+> *display* pacing is the presenter's job (buffering the snapshot stream), not the
+> engine's; AI never pauses. See also Epic 11 / 13.8.
+
 - [ ] **8.1** Legal-move validation: follow led suit; trump rules; using the variant's
       trump definition. *Done when:* illegal plays rejected, legal plays accepted, across
       both variants.
