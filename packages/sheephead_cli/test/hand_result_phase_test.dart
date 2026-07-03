@@ -47,7 +47,7 @@ void main() {
     isIPicker: isIPicker,
     isIDealer: isIDealer,
     isIGoingAlone: isIGoingAlone,
-    handResults: results,
+    phase: HandResultPhaseView(results: results ?? const []),
   );
 
   group('buildContent', () {
@@ -112,6 +112,28 @@ void main() {
         ),
       );
       expect(content, contains('(total: -4)'));
+    });
+
+    test('pads the running-total column so rows stay aligned', () {
+      final content = phase.buildContent(
+        makeView(
+          results: [
+            const PlayerScore(id: PlayerId(0), handPoints: 3, runningTotal: 8),
+            const PlayerScore(
+              id: PlayerId(2),
+              handPoints: 3,
+              runningTotal: 100,
+            ),
+          ],
+        ),
+      );
+      final rows = content
+          .split('\n')
+          .where((l) => l.contains('(total:'))
+          .toList();
+
+      expect(rows, hasLength(2));
+      expect(rows[0].length, rows[1].length);
     });
 
     test('shows picker label for picker opponent', () {

@@ -16,7 +16,7 @@ class BuryPhase with TableLayout, PickPhaseLabel implements GamePhase {
   @override
   String buildContent(PlayerView view) {
     _hand = view.hand;
-    _chopAllowed = view.isChopAllowed;
+    _chopAllowed = (view.phase as BuryPhaseView).isChopAllowed;
 
     final buffer = StringBuffer();
 

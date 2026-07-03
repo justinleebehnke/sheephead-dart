@@ -13,8 +13,8 @@ class HandResultPhase with TableLayout, TrickPhaseLabel implements GamePhase {
     buffer.writeln(center('Hand Result'));
     buffer.writeln();
 
-    final results = view.handResults;
-    if (results != null && results.isNotEmpty) {
+    final results = (view.phase as HandResultPhaseView).results;
+    if (results.isNotEmpty) {
       final labels = results
           .map(
             (s) => s.id == view.id

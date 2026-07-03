@@ -1,6 +1,6 @@
 import 'card.dart';
+import 'phase_view.dart';
 import 'player_id.dart';
-import 'player_score.dart';
 import 'seated_player.dart';
 
 class PlayerView {
@@ -9,14 +9,10 @@ class PlayerView {
     required this.hand,
     required this.opponents,
     required this.isMyTurnToAct,
-    this.isChopAllowed = false,
-    this.isOfferedSteal = false,
+    required this.phase,
     this.isIDealer = false,
     this.isIPicker = false,
     this.isIGoingAlone = false,
-    this.cardPlayed,
-    this.trickWinnerId,
-    this.handResults,
   });
 
   final PlayerId id;
@@ -25,12 +21,8 @@ class PlayerView {
   final List<SeatedPlayer> opponents;
 
   final bool isMyTurnToAct;
-  final bool isChopAllowed;
-  final bool isOfferedSteal;
+  final PhaseView phase;
   final bool isIDealer;
   final bool isIPicker;
   final bool isIGoingAlone;
-  final Card? cardPlayed;
-  final PlayerId? trickWinnerId;
-  final List<PlayerScore>? handResults;
 }

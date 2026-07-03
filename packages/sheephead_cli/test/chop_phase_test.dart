@@ -47,7 +47,7 @@ void main() {
     ],
     isMyTurnToAct: true,
     isIPicker: true,
-    isChopAllowed: true,
+    phase: const BuryPhaseView(isChopAllowed: true),
   );
 
   group('buildContent', () {

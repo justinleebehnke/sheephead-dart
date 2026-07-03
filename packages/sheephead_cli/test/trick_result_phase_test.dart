@@ -10,8 +10,8 @@ void main() {
   });
 
   PlayerView makeView({
-    PlayerId? winnerId,
-    Card? myCard,
+    PlayerId winnerId = const PlayerId(2),
+    Card myCard = const Card(Suit.clubs, Rank.queen),
     Card? leftPlayed,
     Card? acrossPlayed,
     Card? rightPlayed,
@@ -48,8 +48,7 @@ void main() {
       ),
     ],
     isMyTurnToAct: false,
-    cardPlayed: myCard,
-    trickWinnerId: winnerId,
+    phase: TrickResultPhaseView(cardPlayed: myCard, trickWinnerId: winnerId),
   );
 
   group('buildContent', () {

@@ -45,6 +45,7 @@ void main() {
       ),
     ],
     isMyTurnToAct: true,
+    phase: const PickPhaseView(),
   );
 
   group('buildContent', () {

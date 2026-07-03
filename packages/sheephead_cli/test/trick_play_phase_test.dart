@@ -54,6 +54,7 @@ void main() {
       ),
     ],
     isMyTurnToAct: true,
+    phase: const TrickPlayPhaseView(),
   );
 
   group('buildContent', () {
@@ -173,6 +174,7 @@ void main() {
             ),
       ],
       isMyTurnToAct: true,
+      phase: const TrickPlayPhaseView(),
     );
 
     test('does not show passed status', () {

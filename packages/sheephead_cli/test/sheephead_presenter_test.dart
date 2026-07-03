@@ -245,6 +245,7 @@ class _FakeGameSession implements GameSession {
     hand: [],
     opponents: [],
     isMyTurnToAct: false,
+    phase: PickPhaseView(),
   );
   CommandResult result = const Accepted();
   Command? lastSubmitted;

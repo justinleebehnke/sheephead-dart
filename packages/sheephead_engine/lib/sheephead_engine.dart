@@ -5,6 +5,7 @@ export 'src/card.dart';
 export 'src/command.dart';
 export 'src/decline_steal_command.dart';
 export 'src/pass_command.dart';
+export 'src/phase_view.dart';
 export 'src/pick_command.dart';
 export 'src/play_card_command.dart';
 export 'src/steal_command.dart';

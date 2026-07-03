@@ -39,7 +39,7 @@ void main() {
       ),
     ],
     isMyTurnToAct: true,
-    isOfferedSteal: true,
+    phase: const StealPhaseView(),
   );
 
   group('buildContent', () {
@@ -101,7 +101,7 @@ void main() {
         ),
       ],
       isMyTurnToAct: true,
-      isOfferedSteal: true,
+      phase: const StealPhaseView(),
     );
 
     test('labels a player who declined the steal', () {

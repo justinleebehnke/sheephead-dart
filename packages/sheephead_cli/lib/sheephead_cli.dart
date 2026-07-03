@@ -15,5 +15,6 @@ export 'src/sheephead_presenter.dart';
 export 'src/steal_phase.dart';
 export 'src/trick_play_phase.dart';
 export 'src/trick_result_phase.dart';
+export 'src/phase_selector.dart';
 export 'src/terminal.dart';
 export 'src/terminal_presenter.dart';
