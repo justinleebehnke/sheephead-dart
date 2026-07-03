@@ -35,14 +35,16 @@ class GameResultPhase with TableLayout, TrickPhaseLabel implements GamePhase {
       buffer.writeln();
     }
 
-    buffer.write(center('Press Enter to continue'));
+    buffer.writeln(center('Run the program again to play another game.'));
+    buffer.writeln();
+    buffer.write(center('Press Enter to exit'));
 
     return buffer.toString();
   }
 
   @override
   ParseResult interpret(String input) {
-    if (input.trim().isEmpty) return const Advance();
+    if (input.trim().isEmpty) return const Quit();
     return const Unrecognized();
   }
 

@@ -35,11 +35,12 @@ void main() {
       expect(phase.buildContent(makeView()), contains('Game Over'));
     });
 
-    test('shows press Enter prompt', () {
-      expect(
-        phase.buildContent(makeView()),
-        contains('Press Enter to continue'),
-      );
+    test('shows the exit prompt', () {
+      expect(phase.buildContent(makeView()), contains('Press Enter to exit'));
+    });
+
+    test('tells the player to re-run for another game', () {
+      expect(phase.buildContent(makeView()), contains('Run the program again'));
     });
 
     test('shows each player final running total', () {
@@ -110,12 +111,12 @@ void main() {
   });
 
   group('interpret', () {
-    test('empty input advances', () {
-      expect(phase.interpret(''), isA<Advance>());
+    test('empty input quits', () {
+      expect(phase.interpret(''), isA<Quit>());
     });
 
-    test('whitespace-only input advances', () {
-      expect(phase.interpret('  '), isA<Advance>());
+    test('whitespace-only input quits', () {
+      expect(phase.interpret('  '), isA<Quit>());
     });
 
     test('any other input is Unrecognized', () {

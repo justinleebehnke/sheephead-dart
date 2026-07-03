@@ -8,7 +8,10 @@ class Terminal {
     required void Function(String) output,
     required Stream<String> input,
   }) {
-    presenter.display.listen((content) => output('$_clearScreen$content'));
-    input.listen(presenter.submitLine);
+    final inputSubscription = input.listen(presenter.submitLine);
+    presenter.display.listen(
+      (content) => output('$_clearScreen$content'),
+      onDone: inputSubscription.cancel,
+    );
   }
 }

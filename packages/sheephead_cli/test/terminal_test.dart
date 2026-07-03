@@ -18,6 +18,8 @@ class FakePresenter implements TerminalPresenter {
   void dispose() {}
 
   void emitContent(String content) => _contentController.add(content);
+
+  Future<void> close() => _contentController.close();
 }
 
 void main() {
@@ -49,4 +51,18 @@ void main() {
 
     expect(presenter.linesReceived, ['3']);
   });
+
+  test(
+    'stops listening to input once the presenter closes the display',
+    () async {
+      final presenter = FakePresenter();
+      final input = StreamController<String>();
+      Terminal(presenter, output: (_) {}, input: input.stream);
+
+      await presenter.close();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(input.hasListener, isFalse);
+    },
+  );
 }

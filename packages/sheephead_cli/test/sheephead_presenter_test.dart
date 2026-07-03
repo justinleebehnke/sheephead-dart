@@ -167,6 +167,39 @@ void main() {
     });
   });
 
+  group('when the phase returns Quit', () {
+    setUp(() => phase.interpretResult = const Quit());
+
+    test('removes itself as an observer from the session', () {
+      final presenter = makePresenter();
+      expect(session.observers, contains(presenter));
+
+      presenter.submitLine('');
+
+      expect(session.observers, isNot(contains(presenter)));
+    });
+
+    test('closes the display stream', () async {
+      final presenter = makePresenter();
+      var closed = false;
+      presenter.display.listen((_) {}, onDone: () => closed = true);
+      await Future<void>.delayed(Duration.zero);
+
+      presenter.submitLine('');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(closed, isTrue);
+    });
+
+    test('does not submit a command to the session', () {
+      final presenter = makePresenter();
+
+      presenter.submitLine('');
+
+      expect(session.lastSubmitted, isNull);
+    });
+  });
+
   group('when disposed', () {
     test('removes itself as an observer from the session', () {
       final presenter = makePresenter();

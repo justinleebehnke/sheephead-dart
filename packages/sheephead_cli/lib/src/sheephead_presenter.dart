@@ -48,6 +48,8 @@ class SheepheadPresenter implements TerminalPresenter, GameObserver {
     switch (_phase.interpret(line)) {
       case Unrecognized():
         _emit(error: 'Unrecognized input: "$line"');
+      case Quit():
+        dispose();
       case Advance():
         _phase = _selector(_session.viewFor(_playerId));
         _emit();

@@ -16,3 +16,7 @@ final class Advance extends ParseResult {
 final class Unrecognized extends ParseResult {
   const Unrecognized();
 }
+
+final class Quit extends ParseResult {
+  const Quit();
+}
