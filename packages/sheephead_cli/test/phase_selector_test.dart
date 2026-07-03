@@ -22,6 +22,13 @@ void main() {
     );
   });
 
+  test('AllPassPhaseView selects AllPassPhase', () {
+    expect(
+      selectPhase(viewFor(const AllPassPhaseView()), selection),
+      isA<AllPassPhase>(),
+    );
+  });
+
   test('BuryPhaseView with no stored selection selects BuryPhase', () {
     expect(
       selectPhase(viewFor(const BuryPhaseView(isChopAllowed: true)), selection),

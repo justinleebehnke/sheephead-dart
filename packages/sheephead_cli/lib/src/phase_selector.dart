@@ -1,5 +1,6 @@
 import 'package:sheephead_engine/sheephead_engine.dart';
 
+import 'all_pass_phase.dart';
 import 'bury_phase.dart';
 import 'bury_selection.dart';
 import 'chop_phase.dart';
@@ -25,6 +26,8 @@ GamePhase selectPhase(PlayerView view, BurySelection burySelection) {
           : BuryPhase(burySelection);
     case PickPhaseView():
       return PickPassPhase();
+    case AllPassPhaseView():
+      return AllPassPhase();
     case TrickPlayPhaseView():
       return TrickPlayPhase();
   }

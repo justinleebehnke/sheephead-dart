@@ -113,6 +113,20 @@ dart analyze --fatal-infos --fatal-warnings           # static analysis; infos a
   Every type that crosses this boundary (`Command`, `CommandResult`, `GameConfig`,
   `PlayerView`, `PlayerId`) is plain data — no function-typed fields, no behavior
   crossing the boundary. See `BACKLOG.md` Epic 2.
+- **The engine decides the phase; clients never infer it.** A `PlayerView` carries
+  a sealed `PhaseView` discriminator naming the phase that view was captured in
+  (pick, all-pass, bury, steal, trick-play, trick-result, hand-result, game-result,
+  …). Each variant carries *exactly and only* the fields that phase requires, as
+  non-nullable — so "because we are in phase X, fields Y and Z are present" is a
+  compile-time guarantee, not a convention. The engine is the sole authority on
+  which phase it is and picks the right variant (e.g. a last-hand all-pass emits
+  `GameResultPhaseView`, not `AllPassPhaseView`, because there is no redeal).
+  Clients — CLI, AI, later a server — **`switch` exhaustively over `PhaseView`**
+  and never reconstruct the phase from a bag of optional flags or heuristics like
+  hand size. A phase is a property of the game state on *every* update, orthogonal
+  to `isMyTurnToAct` (whether *this* player is the one to act within it). Adding a
+  phase means adding a `PhaseView` variant and letting the compiler's exhaustiveness
+  check flag every client that must handle it.
 - **The engine is a pure state machine; it has no notion of waiting.** The engine
   is the accumulated result of all events applied so far. It cannot produce new
   events until a `Command` is submitted — not because it is "blocked," but because
@@ -178,8 +192,14 @@ configuration, not by changing these.
   starting left of the picker and ending at the dealer; default is decline (no
   prompt friction); the first player to accept gets it and no one else is asked.
   Stealing = going alone; the stealer does not see the blind. Configurable on/off.
-- **Doubles on all-pass:** if everyone passes, the hand is doubled; pass again →
-  the next two hands are doubled, escalating. Same dealer redeals (configurable).
+- **Doubles on all-pass:** a doubles hand always pays **×2** — never a larger
+  multiplier, and this is not configurable. If everyone passes, the same dealer
+  redeals and the redealt hand is a doubles hand. Passing out a hand that is
+  *already* doubles pushes **another** doubles hand onto a stack: the redeal stays
+  doubles *and* one more future hand becomes doubles too, so several ×2 hands can
+  queue up to be worked through (no limit). Escalation is depth on this stack, not
+  a bigger multiplier. Same dealer redeals (configurable). Do not model this as a
+  multiplier value; track a count of pending doubles hands.
 - **Cut-card rule:** a designated cut card triggers a round of doubles
   (configurable).
 - **Picker-no-trick penalty:** if the picker takes no trick, apply a configurable

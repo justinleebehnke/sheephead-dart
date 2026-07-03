@@ -10,6 +10,10 @@ class PickPhaseView extends PhaseView {
   const PickPhaseView();
 }
 
+class AllPassPhaseView extends PhaseView {
+  const AllPassPhaseView();
+}
+
 class BuryPhaseView extends PhaseView {
   const BuryPhaseView({required this.isChopAllowed});
 
