@@ -83,6 +83,22 @@ void main() {
     );
   });
 
+  test('GameResultPhaseView selects GameResultPhase', () {
+    expect(
+      selectPhase(viewFor(const GameResultPhaseView(standings: [])), selection),
+      isA<GameResultPhase>(),
+    );
+  });
+
+  test('entering GameResultPhase clears a stale bury selection', () {
+    selection.cards = [
+      const Card(Suit.clubs, Rank.queen),
+      const Card(Suit.spades, Rank.ace),
+    ];
+    selectPhase(viewFor(const GameResultPhaseView(standings: [])), selection);
+    expect(selection.cards, isNull);
+  });
+
   test('entering HandResultPhase clears a stale bury selection', () {
     selection.cards = [
       const Card(Suit.clubs, Rank.queen),

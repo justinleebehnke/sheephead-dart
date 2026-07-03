@@ -43,3 +43,13 @@ class HandResultPhaseView extends PhaseView {
 
   final List<PlayerScore> results;
 }
+
+class GameResultPhaseView extends PhaseView {
+  const GameResultPhaseView({
+    required this.standings,
+    this.endedOnPassedOutHand = false,
+  });
+
+  final List<PlayerScore> standings;
+  final bool endedOnPassedOutHand;
+}
