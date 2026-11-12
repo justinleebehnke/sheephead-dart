@@ -246,10 +246,10 @@ resolution; crack/recrack doublers; bury-legality rules.
 
 ## Workflow / git
 
-- Trunk-based. Work done together in a session (the maintainer reviewing each
-  step) is **committed directly to `main` in super small steps**, behind the
-  local pre-push hook — no branch or pull request. CI still runs on every push
-  to `main`.
+- Trunk-based. Work happens on `main` in super small steps — no branch or pull
+  request. **The agent never commits or pushes**; it leaves changes in the
+  working tree, and the maintainer reviews and commits them, behind the local
+  pre-push hook. CI still runs on every push to `main`.
 - Never use `git push --no-verify`. Never weaken the gates to make something pass.
 - CI runs format, analyze, and tests on push to `main` and on every PR. A red
   `main` is a stop-the-line event: fixing it precedes all other work.
