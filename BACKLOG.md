@@ -321,6 +321,36 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 
 ---
 
+## Epic A — Acceptance tests (Dave Farley's four layers)
+
+> One spec suite in domain language → one DSL → a protocol driver per channel
+> (`CliDriver` now, server later) → the real system as a black box. See
+> `CLAUDE.md` "Acceptance tests". Each later story begins with its failing spec
+> (outer loop) and is driven green by inner AAID unit-test cycles.
+
+- [ ] **A.1** Configurable composition root: extract the wiring in
+      `bin/sheephead.dart` into a function taking seed, round count, input and
+      output; `main()` parses flags (`--seed`, `--rounds`). *Done when:* two runs with
+      the same `--seed` and the same input produce identical output.
+- [ ] **A.2** Stated deal: a `Shuffler` variant that returns a given order, selectable
+      on the deployed program (e.g. `--deal <file>`). A deliberate test hook at the
+      edge, not a back door into engine state. *Done when:* a spec can say "Alice holds
+      Q♣ 7♦ …" and the CLI deals exactly that.
+- [ ] **A.3** Test-controlled seats: a mode where the driver controls every seat
+      (hot-seat / scripted) instead of three `RandomAi`s. *Done when:* a spec can say
+      "Bob passes, Carol picks."
+- [ ] **A.4** Plain output mode (`--plain`): no ANSI clear-screen, stable labels, so the
+      driver parses text, not screen paint. *Done when:* the driver reads a phase and
+      hand from plain output without stripping escape codes.
+- [ ] **A.5** `packages/sheephead_acceptance` with `specs/`, `dsl/`, `drivers/`; wired into
+      `tool/test_all.sh` and CI. *Done when:* an empty suite runs green in CI.
+- [ ] **A.6** Walking skeleton: one spec end-to-end through `CliDriver`, e.g. "the
+      picker must bury exactly two cards." Build A.1–A.5 in their simplest form to
+      make it pass. *Done when:* the spec fails if the bury rule is broken and passes
+      otherwise.
+- [ ] **A.7** *(later)* Optional in-process `EngineDriver` for fast feedback, and a
+      subprocess mode for `CliDriver` that runs the real binary (production-like).
+
 ## Notes / parking lot
 
 ### Per-player UI preferences (tabled, not in scope yet)
@@ -373,3 +403,17 @@ implementing 13.8.
 - `Session`: chains multiple back-to-back bounded sessions for a casual table that wants to
   keep playing past one agreed round count, optionally carrying cumulative tally forward.
   Not designed yet — parked.
+
+### Training & teaching ideas (from `features.md`)
+
+- **Outcome-so-far callouts:** announce what is already certain as play goes on
+  (e.g. "schneider" once the points taken guarantee it).
+- **Auto lay-down (host option):** end the hand as soon as one player provably
+  takes every remaining trick, i.e. once an attentive player *could* have known.
+- **Puzzles:** deals where optimal play reaches a stated best outcome ("best possible:
+  schneider"). Only deals where the right choice never leads to a bad result by
+  chance. They teach principles, so the AI's reasoning has to be trusted first. Find
+  candidate hands where the AI beats `RandomAi` by a wide margin.
+- **AI refinement loop:** hard-coded AI v1 → train a learning AI against it → capture
+  where the learner deviates in the same situation → encode as hard-coded v2 →
+  confirm by simulation that v2 beats v1 → repeat.
