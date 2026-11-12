@@ -1,18 +1,21 @@
 library;
 
-export 'src/bury_command.dart';
 export 'src/card.dart';
 export 'src/command.dart';
-export 'src/decline_steal_command.dart';
-export 'src/pass_command.dart';
-export 'src/phase_view.dart';
-export 'src/pick_command.dart';
-export 'src/play_card_command.dart';
-export 'src/steal_command.dart';
 export 'src/command_result.dart';
+export 'src/deck_composition.dart';
+export 'src/game_config.dart';
+export 'src/game_observer.dart';
+export 'src/game_session.dart';
+export 'src/phase_view.dart';
 export 'src/player_id.dart';
 export 'src/player_score.dart';
 export 'src/player_view.dart';
 export 'src/relative_seat.dart';
 export 'src/seated_player.dart';
+export 'src/random_ai.dart';
+export 'src/sheephead_game_session.dart';
+export 'src/shuffler.dart';
+export 'src/trick_resolver.dart';
+export 'src/trump_evaluator.dart';
 export 'src/version.dart';

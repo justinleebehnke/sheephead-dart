@@ -6,6 +6,9 @@ import 'table_layout.dart';
 import 'trick_phase_label.dart';
 
 class TrickPlayPhase with TableLayout, TrickPhaseLabel implements GamePhase {
+  TrickPlayPhase(this._playerId);
+
+  final PlayerId _playerId;
   List<Card> _hand = [];
 
   @override
@@ -37,6 +40,6 @@ class TrickPlayPhase with TableLayout, TrickPhaseLabel implements GamePhase {
     final n = int.tryParse(input.trim());
     if (n == null) return const Unrecognized();
     if (n < 1 || n > _hand.length) return const Unrecognized();
-    return Submit(PlayCardCommand(card: _hand[n - 1]));
+    return Submit(PlayCardCommand(playerId: _playerId, card: _hand[n - 1]));
   }
 }

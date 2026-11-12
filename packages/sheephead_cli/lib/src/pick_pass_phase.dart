@@ -6,6 +6,10 @@ import 'pick_phase_label.dart';
 import 'table_layout.dart';
 
 class PickPassPhase with TableLayout, PickPhaseLabel implements GamePhase {
+  PickPassPhase(this._playerId);
+
+  final PlayerId _playerId;
+
   @override
   String buildContent(PlayerView view) {
     final buffer = StringBuffer();
@@ -27,10 +31,10 @@ class PickPassPhase with TableLayout, PickPhaseLabel implements GamePhase {
   ParseResult interpret(String input) {
     switch (input.trim().toLowerCase()) {
       case 'y':
-        return const Submit(PickCommand());
+        return Submit(PickCommand(_playerId));
       case 'n':
       case '':
-        return const Submit(PassCommand());
+        return Submit(PassCommand(_playerId));
       default:
         return const Unrecognized();
     }

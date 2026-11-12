@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 void main() {
   late PickPassPhase phase;
 
-  setUp(() => phase = PickPassPhase());
+  setUp(() => phase = PickPassPhase(const PlayerId(0)));
 
   PlayerView makeView({
     List<Card> hand = const [],

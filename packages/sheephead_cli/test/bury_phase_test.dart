@@ -19,7 +19,7 @@ void main() {
 
   setUp(() {
     selection = BurySelection();
-    phase = BuryPhase(selection);
+    phase = BuryPhase(selection, const PlayerId(0));
   });
 
   PlayerView makeView({

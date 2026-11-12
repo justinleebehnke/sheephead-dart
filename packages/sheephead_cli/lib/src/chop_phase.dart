@@ -7,9 +7,10 @@ import 'pick_phase_label.dart';
 import 'table_layout.dart';
 
 class ChopPhase with TableLayout, PickPhaseLabel implements GamePhase {
-  ChopPhase(this._selection);
+  ChopPhase(this._selection, this._playerId);
 
   final BurySelection _selection;
+  final PlayerId _playerId;
 
   @override
   String buildContent(PlayerView view) {
@@ -33,10 +34,14 @@ class ChopPhase with TableLayout, PickPhaseLabel implements GamePhase {
     final cards = _selection.cards!;
     switch (input.trim().toLowerCase()) {
       case 'y':
-        return Submit(BuryCommand(cards: cards, chop: true));
+        return Submit(
+          BuryCommand(playerId: _playerId, cards: cards, chop: true),
+        );
       case 'n':
       case '':
-        return Submit(BuryCommand(cards: cards, chop: false));
+        return Submit(
+          BuryCommand(playerId: _playerId, cards: cards, chop: false),
+        );
       default:
         return const Unrecognized();
     }

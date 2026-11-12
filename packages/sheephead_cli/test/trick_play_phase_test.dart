@@ -6,7 +6,7 @@ void main() {
   late TrickPlayPhase phase;
 
   setUp(() {
-    phase = TrickPlayPhase();
+    phase = TrickPlayPhase(const PlayerId(0));
   });
 
   const hand = [

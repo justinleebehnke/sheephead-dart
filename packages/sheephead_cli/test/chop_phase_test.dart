@@ -13,7 +13,7 @@ void main() {
 
   setUp(() {
     selection = BurySelection()..cards = storedCards;
-    phase = ChopPhase(selection);
+    phase = ChopPhase(selection, const PlayerId(0));
   });
 
   PlayerView makeView({List<Card> hand = const []}) => PlayerView(

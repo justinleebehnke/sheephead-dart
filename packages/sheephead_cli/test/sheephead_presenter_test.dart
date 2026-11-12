@@ -91,7 +91,7 @@ void main() {
 
   group('when the session rejects the command', () {
     setUp(() {
-      phase.interpretResult = Submit(_FakeCommand());
+      phase.interpretResult = Submit(const PassCommand(PlayerId(0)));
       session.result = const Rejected('invalid play');
     });
 
@@ -227,7 +227,7 @@ void main() {
 
   group('when the session accepts the command', () {
     setUp(() {
-      phase.interpretResult = Submit(_FakeCommand());
+      phase.interpretResult = Submit(const PassCommand(PlayerId(0)));
       session.result = const Accepted();
     });
 
@@ -269,8 +269,6 @@ void main() {
 }
 
 // --- fakes ---
-
-class _FakeCommand implements Command {}
 
 class _FakeGameSession implements GameSession {
   PlayerView viewResult = const PlayerView(

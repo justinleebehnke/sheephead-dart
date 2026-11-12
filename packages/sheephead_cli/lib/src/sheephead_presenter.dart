@@ -2,9 +2,7 @@ import 'dart:async';
 
 import 'package:sheephead_engine/sheephead_engine.dart';
 
-import 'game_observer.dart';
 import 'game_phase.dart';
-import 'game_session.dart';
 import 'parse_result.dart';
 import 'screen_frame.dart';
 import 'terminal_presenter.dart';
@@ -35,7 +33,10 @@ class SheepheadPresenter implements TerminalPresenter, GameObserver {
   Stream<String> get display => _controller.stream;
 
   @override
-  void onChanged() => _emit();
+  void onChanged() {
+    _phase = _selector(_session.viewFor(_playerId));
+    _emit();
+  }
 
   @override
   void dispose() {

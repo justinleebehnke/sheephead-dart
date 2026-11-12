@@ -25,7 +25,8 @@ class StealPhaseView extends PhaseView {
 }
 
 class TrickPlayPhaseView extends PhaseView {
-  const TrickPlayPhaseView();
+  const TrickPlayPhaseView({this.leadSuit});
+  final Suit? leadSuit;
 }
 
 class TrickResultPhaseView extends PhaseView {

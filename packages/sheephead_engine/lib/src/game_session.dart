@@ -1,6 +1,8 @@
-import 'package:sheephead_engine/sheephead_engine.dart';
-
+import 'command.dart';
+import 'command_result.dart';
 import 'game_observer.dart';
+import 'player_id.dart';
+import 'player_view.dart';
 
 abstract interface class GameSession {
   void addObserver(GameObserver observer);

@@ -7,9 +7,10 @@ import 'pick_phase_label.dart';
 import 'table_layout.dart';
 
 class BuryPhase with TableLayout, PickPhaseLabel implements GamePhase {
-  BuryPhase(this._selection);
+  BuryPhase(this._selection, this._playerId);
 
   final BurySelection _selection;
+  final PlayerId _playerId;
   List<Card> _hand = [];
   bool _chopAllowed = false;
 
@@ -57,6 +58,6 @@ class BuryPhase with TableLayout, PickPhaseLabel implements GamePhase {
       return const Advance();
     }
 
-    return Submit(BuryCommand(cards: cards, chop: false));
+    return Submit(BuryCommand(playerId: _playerId, cards: cards, chop: false));
   }
 }

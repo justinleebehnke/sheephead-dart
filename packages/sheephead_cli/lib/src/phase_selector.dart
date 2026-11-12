@@ -26,13 +26,13 @@ GamePhase selectPhase(PlayerView view, BurySelection burySelection) {
       return StealPhase();
     case BuryPhaseView():
       return burySelection.cards != null
-          ? ChopPhase(burySelection)
-          : BuryPhase(burySelection);
+          ? ChopPhase(burySelection, view.id)
+          : BuryPhase(burySelection, view.id);
     case PickPhaseView():
-      return PickPassPhase();
+      return PickPassPhase(view.id);
     case AllPassPhaseView():
       return AllPassPhase();
     case TrickPlayPhaseView():
-      return TrickPlayPhase();
+      return TrickPlayPhase(view.id);
   }
 }
