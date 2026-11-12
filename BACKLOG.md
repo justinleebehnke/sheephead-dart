@@ -25,12 +25,15 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 - [ ] **1.2** `DeckComposition` in `GameConfig`: build a full 32-card deck OR the Spitzer
       26-card deck (remove 7♣ 7♠ 7♥ 8♣ 8♠ 8♥; keep 7♦ 8♦ as diamonds/trump). *Done when:*
       Spitzer deck has exactly 26 cards and contains 7♦ + 8♦ but not 7♣/8♣ etc.
+      *Partial:* Spitzer 26-card deck done; full 32-card deck not yet.
 - [ ] **1.3** `TrumpOrder` strategy: a comparator over trump cards. Provide `standard`
       and `spitzer` (7♦ ranked second, immediately behind Q♣). *Done when:* in spitzer
       order, 7♦ beats every trump except Q♣.
+      *Partial:* Spitzer order done; `standard` order and a swappable strategy not yet.
 - [ ] **1.4** `isTrump(card, config)` and full power-ranking of any two cards for trick
       resolution. *Done when:* a parameterized table of (cardA, cardB, leadSuit) → winner
       passes for both variants.
+      *Partial:* Spitzer only; `isTrump` does not yet take the config.
 
 ## Epic 2 — Deal (and the engine's command/event contract)
 
@@ -47,47 +50,46 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 > immediately and rests at the first `Pick` phase. After each hand the engine auto-deals the
 > next unless the session has reached its configured hand count, at which point it emits
 > `GameResultPhaseView` and halts. See `CLAUDE.md`'s engine-contract invariant.
-> Note: `GameSession` and `GameObserver` are the engine's public boundary; they must live in
-> `sheephead_engine`, not `sheephead_cli` (where they currently reside as stubs).
 
-- [ ] **2.1** Outside-in: write a failing test that constructs
+- [x] **2.1** Outside-in: write a failing test that constructs
       `SheepheadGameSession(GameConfig.spitzer4(), Shuffler(Random(seed)))` and asserts on
       the immediate `viewFor(playerId)` results — four 6-card hands, 2-card blind hidden,
       all 26 cards accounted for, no duplicates, phase is `PickPhaseView` with the correct
       player to act — never by reaching into engine internals directly. *Done when:* the
       test exists and fails (most likely on missing types at first).
-- [ ] **2.2** Minimal skeleton — just enough for 2.1 to compile: move `GameSession` and
+- [x] **2.2** Minimal skeleton — just enough for 2.1 to compile: move `GameSession` and
       `GameObserver` from `sheephead_cli` into `sheephead_engine`; add `GameConfig` (at
       minimum: `playerCount`, `handSize`, `blindSize`, `roundsPerGame`) and a
       `SheepheadGameSession` class stub. *Done when:* 2.1 compiles and fails on an
       assertion, not on a missing type.
-- [ ] **2.3** `Shuffler` wrapping an injected `Random`. *Done when:* same seed → same order;
+- [x] **2.3** `Shuffler` wrapping an injected `Random`. *Done when:* same seed → same order;
       different seed → (almost always) different order.
-- [ ] **2.4** Session construction deals: build deck from `GameConfig` (reusing Epic 1.2's
+- [x] **2.4** Session construction deals: build deck from `GameConfig` (reusing Epic 1.2's
       `DeckComposition`), shuffle with the injected `Shuffler`, distribute hands and blind,
       fold `HandDealt` event(s) through `apply`, and rest at the first `PickPhaseView`.
       *Done when:* a 4-player Spitzer session yields four 6-card hands and a 2-card blind,
       all 26 cards accounted for, no duplicates.
-- [ ] **2.5** `apply(state, HandDealt)` reducer + `deriveView(state, playerId)`, enough for
+- [x] **2.5** `apply(state, HandDealt)` reducer + `deriveView(state, playerId)`, enough for
       2.1's `viewFor()` assertions to pass. *Done when:* 2.1 is green.
-- [ ] **2.6** Config validation: deck size must equal `players * handSize + blindSize`.
+- [x] **2.6** Config validation: deck size must equal `players * handSize + blindSize`.
       *Done when:* an inconsistent `GameConfig` is rejected at construction time with a
       clear error (invalid config is a programming error — a thrown `ArgumentError` at the
       constructor is appropriate here, unlike game-state errors which are `Rejected` results).
 
 ## Epic 3 — Game state and hidden information
 
-- [ ] **3.1** `MasterGameState` — server/engine-only, full information.
-- [ ] **3.2** `PlayerView` — derived per player: own cards in full, others as counts,
+- [x] **3.1** `MasterGameState` — server/engine-only, full information.
+- [x] **3.2** `PlayerView` — derived per player: own cards in full, others as counts,
       table cards visible, blind hidden unless rules say otherwise. *Done when:* a player's
       view never contains another player's concealed cards (assert at the type/serialization
       boundary, not just in UI).
 - [ ] **3.3** Pure `deriveView(master, playerId)` function. *Done when:* a mutation that
       leaks a hidden card is caught by a test.
+      *Partial:* Views are derived from master state; no test yet proves a leak would be caught.
 
 ## Epic 4 — Picking phase + all-pass resolution
 
-- [ ] **4.1** Pick/pass turn order starting left of dealer. *Done when:* the prompt advances
+- [x] **4.1** Pick/pass turn order starting left of dealer. *Done when:* the prompt advances
       correctly and stops on the first pick.
 
 > All-pass resolution is a richer config axis than "doubles vs leaster" — known real-world
@@ -127,7 +129,7 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 
 ## Epic 5 — Bury
 
-- [ ] **5.1** Picker takes the blind and buries `buryCount` cards (config). *Done when:*
+- [x] **5.1** Picker takes the blind and buries `buryCount` cards (config). *Done when:*
       picker's hand returns to the correct size and buried cards leave play but are recorded
       for scoring.
 - [ ] **5.2** Bury legality rules (e.g., restrictions per config). *Done when:* an illegal
@@ -139,19 +141,19 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 > whoever holds the J♦ — unknown to the table until revealed by play. This determines team
 > membership for scoring (Epic 9) and gates whether the blind can be stolen at all (Epic 7).
 
-- [ ] **6.1** Default partnership: if the picker neither chops nor buries J♦, their partner
+- [x] **6.1** Default partnership: if the picker neither chops nor buries J♦, their partner
       is whoever holds J♦, resolved for scoring purposes (Epic 9) — not revealed to other
       players during play unless/until the card itself is played, per the hidden-information
       invariant. *Done when:* a non-chopped, non-J♦-buried hand resolves the correct partner
       at settlement time.
-- [ ] **6.2** "Chop" declaration: the picker may declare chop at bury time, declining the
+- [x] **6.2** "Chop" declaration: the picker may declare chop at bury time, declining the
       J♦ partnership and going alone. *Done when:* a chopped hand scores as picker-alone,
       ignoring whoever holds J♦.
-- [ ] **6.3** Illegal chop: a picker holding J♦ themselves may not declare chop (no partner
+- [x] **6.3** Illegal chop: a picker holding J♦ themselves may not declare chop (no partner
       exists to cut off; the announcement would mislead the table into believing one exists
       elsewhere). *Done when:* attempting to chop while holding J♦ is rejected with a typed
       reason.
-- [ ] **6.4** Mandatory bury announcement: burying J♦ must be announced at bury time (it
+- [x] **6.4** Mandatory bury announcement: burying J♦ must be announced at bury time (it
       also removes any possible partner, since the card leaves every active hand). *Done
       when:* burying J♦ without the announcement flag is rejected; with it, the bury
       succeeds and is recorded as partner-less.
@@ -201,18 +203,20 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 - [ ] **8.1** Legal-move validation: follow led suit; trump rules; using the variant's
       trump definition. *Done when:* illegal plays rejected, legal plays accepted, across
       both variants.
-- [ ] **8.2** Trick-winner resolution using the trump comparator + lead suit. *Done when:*
+      *Partial:* Follow-suit is enforced for Spitzer; standard variant not yet.
+- [x] **8.2** Trick-winner resolution using the trump comparator + lead suit. *Done when:*
       table-driven cases pass, including 7♦ winning under spitzer order.
-- [ ] **8.3** Play a full hand of tricks; collect won cards per player/team. *Done when:*
+- [x] **8.3** Play a full hand of tricks; collect won cards per player/team. *Done when:*
       all tricks resolve and every card ends in exactly one trick pile.
 
 ## Epic 9 — Scoring (config-driven)
 
-- [ ] **9.1** Point values per card; sum tricks; include buried cards for the picker side.
+- [x] **9.1** Point values per card; sum tricks; include buried cards for the picker side.
       *Done when:* total points across both sides equal the deck's fixed point total.
 - [ ] **9.2** Determine picker side vs defenders, accounting for alone (chop), steal, and
       partner-via-J♦ (Epic 6). *Done when:* win/loss thresholds resolve correctly for
       alone, partnered, and stolen cases.
+      *Partial:* Alone (chop/J♦ bury) and partnered done; steal not yet.
 - [ ] **9.3** Picker-no-trick penalty: if picker takes zero tricks, apply configurable
       multiplier (default ~4× base). *Done when:* toggling the multiplier changes the
       settlement as specified.
@@ -248,12 +252,12 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 > Goal: sit down and play a full 4-player Spitzer `Game` in the terminal, one human + three
 > AI, the way you play King 9 — including your house rules.
 
-- [ ] **11.1** Render a `PlayerView` to the terminal (hand, table, scores). *Done when:*
+- [x] **11.1** Render a `PlayerView` to the terminal (hand, table, scores). *Done when:*
       a dealt hand prints legibly, cards numbered for selection (no trump grouping/sorting
       required for v1 — selection is by number, not by suit/trump knowledge).
-- [ ] **11.2** Prompt the human for pick/pass, bury, steal, and each card play; validate
+- [x] **11.2** Prompt the human for pick/pass, bury, steal, and each card play; validate
       against engine legality. *Done when:* illegal input is re-prompted, never crashes.
-- [ ] **11.3** Drive a complete hand end-to-end (deal → pick → bury → [steal] → tricks →
+- [x] **11.3** Drive a complete hand end-to-end (deal → pick → bury → [steal] → tricks →
       score) against placeholder AI. *Done when:* one full Spitzer hand plays to settlement
       in the terminal.
 - [ ] **11.4** Play a full session (the round count fixed in `GameConfig`) hand-by-hand in
@@ -275,7 +279,7 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 - [ ] **12.1** `SheepheadAi` interface: `decidePick`, `decideBury`, `decidePlay`,
       (later) `declareSteal`. Separate decision trees for picker-role vs defender-role.
       *Done when:* the terminal game runs with an AI implementing the interface.
-- [ ] **12.2** `RandomAi` — 50/50 legal choices. *Done when:* it can fill all three
+- [x] **12.2** `RandomAi` — 50/50 legal choices. *Done when:* it can fill all three
       opponent seats and complete hands.
 - [ ] **12.3** Headless simulation runner: construct N `GameSession`s among given AIs with a
       seeded RNG, collect win rates. *Done when:* 4× `RandomAi` over a large N converges to
@@ -291,23 +295,23 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 
 > Captured from CLI-design discussion, ahead of full implementation in Epic 11.
 
-- [ ] **13.1** Session config is hardcoded for v1 (a single `GameConfig`, fixed round
+- [x] **13.1** Session config is hardcoded for v1 (a single `GameConfig`, fixed round
       count) — no file loading yet. *Done when:* the CLI constructs a `GameSession` with no
       user-supplied configuration at all.
 - [ ] **13.2** *(deferred, not v1)* Load `GameConfig` from a JSON/YAML file, selectable via
       a CLI flag, so more than one config can be used. Parked until after the MVP milestone.
-- [ ] **13.3** Launch goes straight into hand one — no menu/lobby screen.
-- [ ] **13.4** Card selection by number: the hand is listed with each card numbered; the
+- [x] **13.3** Launch goes straight into hand one — no menu/lobby screen.
+- [x] **13.4** Card selection by number: the hand is listed with each card numbered; the
       human types a number to play a card, or comma-separated numbers to bury multiple.
       *Done when:* selection works without needing sorted/grouped trump display.
-- [ ] **13.5** Illegal selections are rejected with a re-prompt and explanation, rather
+- [x] **13.5** Illegal selections are rejected with a re-prompt and explanation, rather
       than filtering the displayed list down to only-legal cards. *Done when:* an illegal
       pick shows the rejection reason and re-prompts against the same full hand listing.
-- [ ] **13.6** No coaching/hints in the CLI MVP. Parked for later, alongside Epic 12.4's
+- [x] **13.6** No coaching/hints in the CLI MVP. Parked for later, alongside Epic 12.4's
       `explain()` hint string.
 - [ ] **13.7** End-of-hand screen shows both this hand's point swing and the cumulative
       running tally across the session. Settlement is zero-sum across players.
-- [ ] **13.8** After each trick completes, hold the screen showing all four played
+- [x] **13.8** After each trick completes, hold the screen showing all four played
       cards and who won, waiting for the human to press Enter before advancing to the
       next lead. The engine has already moved on — this is a display pause in the UI,
       not an engine pause. AI players do not pause. *Done when:* the trick result is
