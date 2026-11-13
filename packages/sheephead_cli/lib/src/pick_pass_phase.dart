@@ -1,17 +1,17 @@
 import 'package:sheephead_engine/sheephead_engine.dart';
 
-import 'game_phase.dart';
+import 'game_phase.interface.dart';
 import 'parse_result.dart';
 import 'pick_phase_label.dart';
 import 'table_layout.dart';
 
-class PickPassPhase with TableLayout, PickPhaseLabel implements GamePhase {
+class PickPassPhase with TableLayout, PickPhaseLabel implements IGamePhase {
   PickPassPhase(this._playerId);
 
   final PlayerId _playerId;
 
   @override
-  String buildContent(PlayerView view) {
+  String buildContent(PlayerViewDto view) {
     final buffer = StringBuffer();
 
     buffer.writeln(opponentTable(view));
@@ -31,10 +31,10 @@ class PickPassPhase with TableLayout, PickPhaseLabel implements GamePhase {
   ParseResult interpret(String input) {
     switch (input.trim().toLowerCase()) {
       case 'y':
-        return Submit(PickCommand(_playerId));
+        return Submit(PickCommandDto(_playerId));
       case 'n':
       case '':
-        return Submit(PassCommand(_playerId));
+        return Submit(PassCommandDto(_playerId));
       default:
         return const Unrecognized();
     }

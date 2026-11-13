@@ -2,19 +2,19 @@ import 'dart:async';
 
 import 'package:sheephead_engine/sheephead_engine.dart';
 
-import 'game_phase.dart';
+import 'game_phase.interface.dart';
 import 'parse_result.dart';
-import 'screen_frame.dart';
-import 'terminal_presenter.dart';
+import 'screen_frame.interface.dart';
+import 'terminal_presenter.interface.dart';
 
-typedef PhaseSelector = GamePhase Function(PlayerView view);
+typedef PhaseSelector = IGamePhase Function(PlayerViewDto view);
 
-class SheepheadPresenter implements TerminalPresenter, GameObserver {
+class SheepheadPresenter implements ITerminalPresenter, IGameObserver {
   SheepheadPresenter(
     this._session,
     this._playerId,
     this._layout, {
-    required GamePhase initialPhase,
+    required IGamePhase initialPhase,
     required PhaseSelector selector,
   }) : _phase = initialPhase,
        _selector = selector {
@@ -22,11 +22,11 @@ class SheepheadPresenter implements TerminalPresenter, GameObserver {
     _emit();
   }
 
-  final GameSession _session;
+  final IGameSession _session;
   final PlayerId _playerId;
-  final ScreenFrame _layout;
+  final IScreenFrame _layout;
   final PhaseSelector _selector;
-  GamePhase _phase;
+  IGamePhase _phase;
   final _controller = StreamController<String>();
 
   @override

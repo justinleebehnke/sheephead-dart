@@ -16,7 +16,7 @@ void main() {
     phase = ChopPhase(selection, const PlayerId(0));
   });
 
-  PlayerView makeView({List<Card> hand = const []}) => PlayerView(
+  PlayerViewDto makeView({List<Card> hand = const []}) => PlayerViewDto(
     id: const PlayerId(0),
     hand: hand,
     opponents: [
@@ -47,7 +47,7 @@ void main() {
     ],
     isMyTurnToAct: true,
     isIPicker: true,
-    phase: const BuryPhaseView(isChopAllowed: true),
+    phase: const BuryPhaseViewDto(isChopAllowed: true),
   );
 
   group('buildContent', () {
@@ -82,41 +82,41 @@ void main() {
   });
 
   group('interpret', () {
-    test('"y" submits BuryCommand with chop true and the stored cards', () {
+    test('"y" submits BuryCommandDto with chop true and the stored cards', () {
       final result = phase.interpret('y');
 
       expect(result, isA<Submit>());
-      final cmd = (result as Submit).command as BuryCommand;
+      final cmd = (result as Submit).command as BuryCommandDto;
       expect(cmd.chop, isTrue);
       expect(cmd.cards, storedCards);
     });
 
-    test('"Y" submits BuryCommand with chop true', () {
+    test('"Y" submits BuryCommandDto with chop true', () {
       final result = phase.interpret('Y');
 
       expect(result, isA<Submit>());
-      expect(((result as Submit).command as BuryCommand).chop, isTrue);
+      expect(((result as Submit).command as BuryCommandDto).chop, isTrue);
     });
 
-    test('"n" submits BuryCommand with chop false', () {
+    test('"n" submits BuryCommandDto with chop false', () {
       final result = phase.interpret('n');
 
       expect(result, isA<Submit>());
-      expect(((result as Submit).command as BuryCommand).chop, isFalse);
+      expect(((result as Submit).command as BuryCommandDto).chop, isFalse);
     });
 
-    test('"N" submits BuryCommand with chop false', () {
+    test('"N" submits BuryCommandDto with chop false', () {
       final result = phase.interpret('N');
 
       expect(result, isA<Submit>());
-      expect(((result as Submit).command as BuryCommand).chop, isFalse);
+      expect(((result as Submit).command as BuryCommandDto).chop, isFalse);
     });
 
-    test('empty input submits BuryCommand with chop false (default no)', () {
+    test('empty input submits BuryCommandDto with chop false (default no)', () {
       final result = phase.interpret('');
 
       expect(result, isA<Submit>());
-      expect(((result as Submit).command as BuryCommand).chop, isFalse);
+      expect(((result as Submit).command as BuryCommandDto).chop, isFalse);
     });
 
     test('unrecognized input returns Unrecognized', () {

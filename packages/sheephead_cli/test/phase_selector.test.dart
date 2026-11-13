@@ -7,7 +7,7 @@ void main() {
 
   setUp(() => selection = BurySelection());
 
-  PlayerView viewFor(PhaseView phase) => PlayerView(
+  PlayerViewDto viewFor(PhaseViewDto phase) => PlayerViewDto(
     id: const PlayerId(0),
     hand: const [],
     opponents: const [],
@@ -15,57 +15,63 @@ void main() {
     phase: phase,
   );
 
-  test('PickPhaseView selects PickPassPhase', () {
+  test('PickPhaseViewDto selects PickPassPhase', () {
     expect(
-      selectPhase(viewFor(const PickPhaseView()), selection),
+      selectPhase(viewFor(const PickPhaseViewDto()), selection),
       isA<PickPassPhase>(),
     );
   });
 
-  test('AllPassPhaseView selects AllPassPhase', () {
+  test('AllPassPhaseViewDto selects AllPassPhase', () {
     expect(
-      selectPhase(viewFor(const AllPassPhaseView()), selection),
+      selectPhase(viewFor(const AllPassPhaseViewDto()), selection),
       isA<AllPassPhase>(),
     );
   });
 
-  test('BuryPhaseView with no stored selection selects BuryPhase', () {
+  test('BuryPhaseViewDto with no stored selection selects BuryPhase', () {
     expect(
-      selectPhase(viewFor(const BuryPhaseView(isChopAllowed: true)), selection),
+      selectPhase(
+        viewFor(const BuryPhaseViewDto(isChopAllowed: true)),
+        selection,
+      ),
       isA<BuryPhase>(),
     );
   });
 
-  test('BuryPhaseView with a stored selection selects ChopPhase', () {
+  test('BuryPhaseViewDto with a stored selection selects ChopPhase', () {
     selection.cards = [
       const Card(Suit.clubs, Rank.queen),
       const Card(Suit.spades, Rank.ace),
     ];
     expect(
-      selectPhase(viewFor(const BuryPhaseView(isChopAllowed: true)), selection),
+      selectPhase(
+        viewFor(const BuryPhaseViewDto(isChopAllowed: true)),
+        selection,
+      ),
       isA<ChopPhase>(),
     );
   });
 
-  test('StealPhaseView selects StealPhase', () {
+  test('StealPhaseViewDto selects StealPhase', () {
     expect(
-      selectPhase(viewFor(const StealPhaseView()), selection),
+      selectPhase(viewFor(const StealPhaseViewDto()), selection),
       isA<StealPhase>(),
     );
   });
 
-  test('TrickPlayPhaseView selects TrickPlayPhase', () {
+  test('TrickPlayPhaseViewDto selects TrickPlayPhase', () {
     expect(
-      selectPhase(viewFor(const TrickPlayPhaseView()), selection),
+      selectPhase(viewFor(const TrickPlayPhaseViewDto()), selection),
       isA<TrickPlayPhase>(),
     );
   });
 
-  test('TrickResultPhaseView selects TrickResultPhase', () {
+  test('TrickResultPhaseViewDto selects TrickResultPhase', () {
     expect(
       selectPhase(
         viewFor(
-          const TrickResultPhaseView(
+          const TrickResultPhaseViewDto(
             cardPlayed: Card(Suit.clubs, Rank.queen),
             trickWinnerId: PlayerId(2),
           ),
@@ -76,16 +82,22 @@ void main() {
     );
   });
 
-  test('HandResultPhaseView selects HandResultPhase', () {
+  test('HandResultPhaseViewDto selects HandResultPhase', () {
     expect(
-      selectPhase(viewFor(const HandResultPhaseView(results: [])), selection),
+      selectPhase(
+        viewFor(const HandResultPhaseViewDto(results: [])),
+        selection,
+      ),
       isA<HandResultPhase>(),
     );
   });
 
-  test('GameResultPhaseView selects GameResultPhase', () {
+  test('GameResultPhaseViewDto selects GameResultPhase', () {
     expect(
-      selectPhase(viewFor(const GameResultPhaseView(standings: [])), selection),
+      selectPhase(
+        viewFor(const GameResultPhaseViewDto(standings: [])),
+        selection,
+      ),
       isA<GameResultPhase>(),
     );
   });
@@ -95,7 +107,10 @@ void main() {
       const Card(Suit.clubs, Rank.queen),
       const Card(Suit.spades, Rank.ace),
     ];
-    selectPhase(viewFor(const GameResultPhaseView(standings: [])), selection);
+    selectPhase(
+      viewFor(const GameResultPhaseViewDto(standings: [])),
+      selection,
+    );
     expect(selection.cards, isNull);
   });
 
@@ -104,7 +119,7 @@ void main() {
       const Card(Suit.clubs, Rank.queen),
       const Card(Suit.spades, Rank.ace),
     ];
-    selectPhase(viewFor(const HandResultPhaseView(results: [])), selection);
+    selectPhase(viewFor(const HandResultPhaseViewDto(results: [])), selection);
     expect(selection.cards, isNull);
   });
 }

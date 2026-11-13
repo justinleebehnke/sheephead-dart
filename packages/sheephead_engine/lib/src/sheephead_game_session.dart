@@ -1,23 +1,23 @@
 import 'card.dart';
-import 'command.dart';
-import 'command_result.dart';
+import 'command.dto.dart';
+import 'command_result.dto.dart';
 import 'event.dart';
 import 'game_config.dart';
-import 'game_observer.dart';
-import 'game_session.dart';
+import 'game_observer.interface.dart';
+import 'game_session.interface.dart';
+import 'shuffler.interface.dart';
 import 'master_game_state.dart';
-import 'phase_view.dart';
+import 'phase_view.dto.dart';
 import 'player_id.dart';
 import 'player_score.dart';
-import 'player_view.dart';
+import 'player_view.dto.dart';
 import 'relative_seat.dart';
 import 'seated_player.dart';
-import 'shuffler.dart';
 import 'trick_resolver.dart';
 import 'trump_evaluator.dart';
 
-final class SheepheadGameSession implements GameSession {
-  SheepheadGameSession(GameConfig config, Shuffler shuffler)
+final class SheepheadGameSession implements IGameSession {
+  SheepheadGameSession(GameConfig config, IShuffler shuffler)
     : _config = config {
     final required = config.playerCount * config.handSize + config.blindSize;
     final actual = config.deckComposition.cards.length;
@@ -31,10 +31,10 @@ final class SheepheadGameSession implements GameSession {
   }
 
   final GameConfig _config;
-  final List<GameObserver> _observers = [];
+  final List<IGameObserver> _observers = [];
   MasterGameState _state = const MasterGameState();
 
-  void _deal(Shuffler shuffler, {required int dealerIndex}) {
+  void _deal(IShuffler shuffler, {required int dealerIndex}) {
     final shuffled = shuffler.shuffle(_config.deckComposition.cards);
     final hands = <PlayerId, List<Card>>{};
     var offset = 0;
@@ -222,13 +222,13 @@ final class SheepheadGameSession implements GameSession {
   }
 
   @override
-  void addObserver(GameObserver observer) => _observers.add(observer);
+  void addObserver(IGameObserver observer) => _observers.add(observer);
 
   @override
-  void removeObserver(GameObserver observer) => _observers.remove(observer);
+  void removeObserver(IGameObserver observer) => _observers.remove(observer);
 
   @override
-  PlayerView viewFor(PlayerId id) {
+  PlayerViewDto viewFor(PlayerId id) {
     final s = _state;
     final myIndex = id.value;
     final opponents = [
@@ -239,7 +239,7 @@ final class SheepheadGameSession implements GameSession {
           state: s,
         ),
     ];
-    return PlayerView(
+    return PlayerViewDto(
       id: id,
       hand: s.hands[id] ?? const <Card>[],
       opponents: opponents,
@@ -264,28 +264,28 @@ final class SheepheadGameSession implements GameSession {
     };
   }
 
-  PhaseView _phaseFor(PlayerId id, MasterGameState state) {
+  PhaseViewDto _phaseFor(PlayerId id, MasterGameState state) {
     return switch (state.internalPhase) {
-      InternalPhase.pick => const PickPhaseView(),
-      InternalPhase.allPass => const AllPassPhaseView(),
-      InternalPhase.bury => BuryPhaseView(
+      InternalPhase.pick => const PickPhaseViewDto(),
+      InternalPhase.allPass => const AllPassPhaseViewDto(),
+      InternalPhase.bury => BuryPhaseViewDto(
         isChopAllowed:
             id.value == state.pickerIndex &&
             !(state.hands[id] ?? const <Card>[]).contains(
               const Card(Suit.diamonds, Rank.jack),
             ),
       ),
-      InternalPhase.trickPlay => TrickPlayPhaseView(
+      InternalPhase.trickPlay => TrickPlayPhaseViewDto(
         leadSuit: state.currentTrick.isEmpty
             ? null
             : TrumpEvaluator.isTrump(state.currentTrick.first.card)
             ? null
             : state.currentTrick.first.card.suit,
       ),
-      InternalPhase.handResult => HandResultPhaseView(
+      InternalPhase.handResult => HandResultPhaseViewDto(
         results: _computeScores(state),
       ),
-      _ => const PickPhaseView(),
+      _ => const PickPhaseViewDto(),
     };
   }
 
@@ -368,18 +368,18 @@ final class SheepheadGameSession implements GameSession {
   }
 
   @override
-  CommandResult submit(Command command) {
+  CommandResultDto submit(CommandDto command) {
     return switch (command) {
-      PassCommand c => _handlePass(c),
-      PickCommand c => _handlePick(c),
-      BuryCommand c => _handleBury(c),
-      PlayCardCommand c => _handlePlayCard(c),
-      StealCommand() => const Rejected('Not yet implemented'),
-      DeclineStealCommand() => const Rejected('Not yet implemented'),
+      PassCommandDto c => _handlePass(c),
+      PickCommandDto c => _handlePick(c),
+      BuryCommandDto c => _handleBury(c),
+      PlayCardCommandDto c => _handlePlayCard(c),
+      StealCommandDto() => const Rejected('Not yet implemented'),
+      DeclineStealCommandDto() => const Rejected('Not yet implemented'),
     };
   }
 
-  CommandResult _handlePass(PassCommand command) {
+  CommandResultDto _handlePass(PassCommandDto command) {
     if (_state.internalPhase != InternalPhase.pick) {
       return const Rejected('Not in pick phase');
     }
@@ -391,7 +391,7 @@ final class SheepheadGameSession implements GameSession {
     return const Accepted();
   }
 
-  CommandResult _handlePick(PickCommand command) {
+  CommandResultDto _handlePick(PickCommandDto command) {
     if (_state.internalPhase != InternalPhase.pick) {
       return const Rejected('Not in pick phase');
     }
@@ -403,7 +403,7 @@ final class SheepheadGameSession implements GameSession {
     return const Accepted();
   }
 
-  CommandResult _handleBury(BuryCommand command) {
+  CommandResultDto _handleBury(BuryCommandDto command) {
     if (_state.internalPhase != InternalPhase.bury) {
       return const Rejected('Not in bury phase');
     }
@@ -440,7 +440,7 @@ final class SheepheadGameSession implements GameSession {
     return const Accepted();
   }
 
-  CommandResult _handlePlayCard(PlayCardCommand command) {
+  CommandResultDto _handlePlayCard(PlayCardCommandDto command) {
     if (_state.internalPhase != InternalPhase.trickPlay) {
       return const Rejected('Not in trick play phase');
     }

@@ -22,12 +22,12 @@ void main() {
     phase = BuryPhase(selection, const PlayerId(0));
   });
 
-  PlayerView makeView({
+  PlayerViewDto makeView({
     List<Card> hand = const [],
     bool isChopAllowed = false,
     bool leftPassed = false,
     bool rightDealer = false,
-  }) => PlayerView(
+  }) => PlayerViewDto(
     id: const PlayerId(0),
     hand: hand,
     opponents: [
@@ -58,7 +58,7 @@ void main() {
     ],
     isMyTurnToAct: true,
     isIPicker: true,
-    phase: BuryPhaseView(isChopAllowed: isChopAllowed),
+    phase: BuryPhaseViewDto(isChopAllowed: isChopAllowed),
   );
 
   group('buildContent', () {
@@ -127,11 +127,11 @@ void main() {
       () => phase.buildContent(makeView(hand: hand8, isChopAllowed: false)),
     );
 
-    test('"1,3" submits BuryCommand directly with chop false', () {
+    test('"1,3" submits BuryCommandDto directly with chop false', () {
       final result = phase.interpret('1,3');
 
       expect(result, isA<Submit>());
-      final cmd = (result as Submit).command as BuryCommand;
+      final cmd = (result as Submit).command as BuryCommandDto;
       expect(cmd.cards, containsAll([hand8[0], hand8[2]]));
       expect(cmd.chop, isFalse);
     });

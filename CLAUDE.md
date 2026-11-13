@@ -39,7 +39,20 @@ Dart package conventions, follow them:
 - `lib/src/**` = private internals.
 - `lib/<package>.dart` = the public API; expose internals via `export`.
 - `bin/**` = runnable entrypoints (have `main()`).
-- `test/**` = tests named `*_test.dart`.
+- `test/**` = tests named `*.test.dart`.
+
+Naming conventions, follow them:
+- An **interface** is an `abstract interface class` named `IFoo`, in a file
+  named `foo.interface.dart`. Nothing else gets the `I` prefix or the
+  `.interface.dart` suffix: no concrete classes, no mixins, no sealed families,
+  and no test fakes (call a fake `_FakeFoo`, not `_FakeIFoo`).
+- A **concrete implementation** gets a plain descriptive name in a plain file,
+  e.g. `RandomShuffler implements IShuffler` in `random_shuffler.dart`. Don't
+  `implements` a concrete class; pull out an `IFoo` instead.
+- A **DTO** is defined under "Design rules" below. DTOs that cross the engine
+  boundary are named `FooDto`, in a file named `foo.dto.dart`. Internal data
+  types that meet the same definition (e.g. `Card`, `PlayerId`) follow the same
+  rules but may keep plain names.
 
 ---
 
@@ -94,7 +107,7 @@ dart analyze --fatal-infos --fatal-warnings           # static analysis; infos a
 - **`Card` knows only suit and rank — never whether it is trump.** Trump-ness
   depends on `GameConfig` (standard vs Spitzer), so it is computed by the engine
   against the config, not stored on the card.
-- **Randomness is injected and seeded.** Wrap an injected `Random` (a `Shuffler`);
+- **Randomness is injected and seeded.** Wrap an injected `Random` (an `IShuffler`);
   never call `Random()` directly inside game logic. Every test that touches
   randomness passes a seed so runs are deterministic.
 - **Hidden information is enforced at the engine boundary.** The engine holds a
@@ -158,23 +171,77 @@ dart analyze --fatal-infos --fatal-warnings           # static analysis; infos a
 
 ---
 
+## Design rules: contracts, factories, composition
+
+The guiding question for every class is **"how hard is this to test?"**,
+followed by "how easy is this to read?" These rules exist so the answer is
+always "trivially": a class's collaborators are contracts, so a test hands it
+tiny fakes and checks what it does with them.
+
+- **Depend only on interfaces and DTOs.** A class (other than a factory or
+  `main`) may depend on `I…` interfaces, DTOs, enums and the Dart core library,
+  and nothing else. Static methods and top-level functions count as concrete
+  dependencies too. Hide them behind an interface instead, so a change to them
+  can't ripple into their callers.
+- **Only factories call constructors.** Concrete collaborators reach a class
+  through its constructor, built and wired by a factory. Constructing DTOs,
+  lists, maps and other plain data is fine anywhere. A factory that needs
+  runtime information (e.g. a phase per view snapshot) is itself injected
+  behind an interface, such as `IGamePhaseFactory.create(view)`, and the caller
+  uses what it returns only through that interface.
+- **Never use what you constructed.** A factory builds and returns. It doesn't
+  call methods on what it built. Building something and then driving it couples
+  you to that concretion, which is exactly what the contracts exist to avoid.
+- **`main` is a humble object.** It is the one place that both constructs and
+  uses what it builds. Keep it so short that its correctness can be checked by
+  eye, and cover it with an end-to-end smoke test, because that's the only thing
+  that proves the wiring is right.
+- **Composition, not inheritance.** No mixins, and no `extends` for sharing
+  behavior. Shared behavior becomes a delegate behind an interface, injected
+  where it's needed. The one exception is a `sealed` DTO family whose variants
+  `extend` the sealed base, because the exhaustive `switch` needs it (see
+  "Architecture invariants").
+- **Aim for 2–3 interface dependencies per class.** This is a soft limit. A
+  class that only brings collaborators together, like a router that switches
+  over a sealed `CommandDto` and hands each case to its handler, may have more,
+  as long as it stays trivial to read and test. If a class needs more because
+  it is doing a lot of work, split the work into delegates behind more contracts.
+- **One owner per piece of mutable state.** If a class keeps track of
+  something, it is the only thing that reads or changes that state, and every
+  other class goes through its interface. No mutable bags passed between
+  objects.
+- **DTOs are pure data.** A DTO is a class that can be converted to JSON and
+  back without losing anything. Its fields are primitives (`int`, `double`,
+  `bool`, `String`, `null`), member-less enums, other DTOs, or lists and maps of
+  these. It has no methods or computed getters, and no `operator ==` or
+  `hashCode` override. If equality, hashing, formatting or any other behavior is
+  needed for a DTO, put it in an interface that takes the DTO (e.g.
+  `ICardFormatter`).
+- **Test doubles are small hand-written fakes.** Dart has no inline object
+  literals, so a fake is a short private class in the test file
+  (`class _FakeShuffler implements IShuffler { … }`). Small interfaces keep
+  fakes to a few lines. If a fake grows large, read that as a sign the
+  interface is too wide.
+
+---
+
 ## CLI display constraints (named assumptions)
 
 The terminal harness targets a standard **80-column terminal**. This is a
 deliberate, named constraint — not an oversight. Consequences:
 
-- **`GamePhase` implementations own their visual layout.** They format content
+- **`IGamePhase` implementations own their visual layout.** They format content
   with 80-column line widths in mind. There is no runtime layout negotiation
-  between `GamePhase` and `ScreenFrame`.
-- **`ScreenFrame` is thin chrome only.** Its job is: ANSI clear-screen, a
+  between `IGamePhase` and `IScreenFrame`.
+- **`IScreenFrame` is thin chrome only.** Its job is: ANSI clear-screen, a
   consistent error zone, and any fixed header/footer. It does not reflow or
   reposition content.
 - **No dynamic terminal sizing in v1.** If the user's terminal is narrower than
   80 columns, content may wrap. That is acceptable for the CLI harness. The
   Flutter app (later) will handle responsive layout properly.
 
-If you find yourself passing terminal dimensions into `GamePhase`, or making
-`ScreenFrame` responsible for spatial layout, stop — the design has drifted from
+If you find yourself passing terminal dimensions into `IGamePhase`, or making
+`IScreenFrame` responsible for spatial layout, stop — the design has drifted from
 these named constraints. Either accept 80 columns or move the discussion to the
 Flutter app layer.
 

@@ -1,10 +1,23 @@
 import 'card.dart';
-import 'phase_view.dart';
+import 'master_game_state.dart';
+import 'phase_view.dto.dart';
 import 'player_id.dart';
 import 'seated_player.dart';
 
-class PlayerView {
-  const PlayerView({
+PlayerViewDto deriveViewDto(MasterGameState state, PlayerId viewerId) {
+  final hand = state.hands[viewerId] ?? const <Card>[];
+
+  return PlayerViewDto(
+    id: viewerId,
+    hand: List<Card>.unmodifiable(hand),
+    opponents: const [],
+    isMyTurnToAct: false,
+    phase: const PickPhaseViewDto(),
+  );
+}
+
+class PlayerViewDto {
+  const PlayerViewDto({
     required this.id,
     required this.hand,
     required this.opponents,
@@ -23,7 +36,7 @@ class PlayerView {
   final List<SeatedPlayer> opponents;
 
   final bool isMyTurnToAct;
-  final PhaseView phase;
+  final PhaseViewDto phase;
   final bool isDoublesHand;
   final bool isIDealer;
   final bool isIPicker;

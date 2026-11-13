@@ -1,19 +1,19 @@
 import 'package:sheephead_engine/sheephead_engine.dart';
 
-import 'game_phase.dart';
+import 'game_phase.interface.dart';
 import 'parse_result.dart';
 import 'table_layout.dart';
 import 'trick_phase_label.dart';
 
-class TrickResultPhase with TableLayout, TrickPhaseLabel implements GamePhase {
+class TrickResultPhase with TableLayout, TrickPhaseLabel implements IGamePhase {
   @override
-  String buildContent(PlayerView view) {
+  String buildContent(PlayerViewDto view) {
     final buffer = StringBuffer();
 
     buffer.writeln(opponentTable(view));
     buffer.writeln();
 
-    final phase = view.phase as TrickResultPhaseView;
+    final phase = view.phase as TrickResultPhaseViewDto;
 
     buffer.writeln(center(phase.cardPlayed.label));
     buffer.writeln();

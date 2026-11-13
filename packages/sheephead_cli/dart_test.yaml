@@ -1,0 +1,2 @@
+# Test files in this repo are named *.test.dart, not the default *_test.dart.
+filename: "*.test.dart"

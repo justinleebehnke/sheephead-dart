@@ -3,33 +3,33 @@ import 'dart:math';
 import 'package:sheephead_engine/sheephead_engine.dart';
 import 'package:test/test.dart';
 
-class _FakeSession implements GameSession {
+class _FakeSession implements IGameSession {
   _FakeSession({
-    required PlayerView view,
-    CommandResult Function(Command)? onSubmit,
+    required PlayerViewDto view,
+    CommandResultDto Function(CommandDto)? onSubmit,
   }) : _view = view,
        _onSubmit = onSubmit ?? _accept;
 
-  static CommandResult _accept(Command c) => const Accepted();
+  static CommandResultDto _accept(CommandDto c) => const Accepted();
 
-  final PlayerView _view;
-  final CommandResult Function(Command) _onSubmit;
-  final List<Command> commands = [];
-
-  @override
-  PlayerView viewFor(PlayerId id) => _view;
+  final PlayerViewDto _view;
+  final CommandResultDto Function(CommandDto) _onSubmit;
+  final List<CommandDto> commands = [];
 
   @override
-  CommandResult submit(Command command) {
+  PlayerViewDto viewFor(PlayerId id) => _view;
+
+  @override
+  CommandResultDto submit(CommandDto command) {
     commands.add(command);
     return _onSubmit(command);
   }
 
   @override
-  void addObserver(GameObserver observer) {}
+  void addObserver(IGameObserver observer) {}
 
   @override
-  void removeObserver(GameObserver observer) {}
+  void removeObserver(IGameObserver observer) {}
 }
 
 const _id = PlayerId(1);
@@ -39,11 +39,11 @@ const _hand = [
   Card(Suit.spades, Rank.nine),
 ];
 
-PlayerView _view({
+PlayerViewDto _view({
   required bool isMyTurn,
-  required PhaseView phase,
+  required PhaseViewDto phase,
   List<Card> hand = _hand,
-}) => PlayerView(
+}) => PlayerViewDto(
   id: _id,
   hand: hand,
   opponents: const <SeatedPlayer>[],
@@ -53,19 +53,19 @@ PlayerView _view({
 
 void main() {
   group('RandomAi — pick phase', () {
-    test('submits PassCommand when it is their turn', () {
+    test('submits PassCommandDto when it is their turn', () {
       final session = _FakeSession(
-        view: _view(isMyTurn: true, phase: const PickPhaseView()),
+        view: _view(isMyTurn: true, phase: const PickPhaseViewDto()),
       );
       RandomAi(_id, session, Random(0)).onChanged();
       expect(session.commands, hasLength(1));
-      final cmd = session.commands.single as PassCommand;
+      final cmd = session.commands.single as PassCommandDto;
       expect(cmd.playerId, equals(_id));
     });
 
     test('submits nothing when it is not their turn', () {
       final session = _FakeSession(
-        view: _view(isMyTurn: false, phase: const PickPhaseView()),
+        view: _view(isMyTurn: false, phase: const PickPhaseViewDto()),
       );
       RandomAi(_id, session, Random(0)).onChanged();
       expect(session.commands, isEmpty);
@@ -73,19 +73,22 @@ void main() {
   });
 
   group('RandomAi — trick play phase', () {
-    test('submits PlayCardCommand with a card from hand when their turn', () {
-      final session = _FakeSession(
-        view: _view(isMyTurn: true, phase: const TrickPlayPhaseView()),
-      );
-      RandomAi(_id, session, Random(0)).onChanged();
-      expect(session.commands, hasLength(1));
-      final cmd = session.commands.single as PlayCardCommand;
-      expect(_hand, contains(cmd.card));
-    });
+    test(
+      'submits PlayCardCommandDto with a card from hand when their turn',
+      () {
+        final session = _FakeSession(
+          view: _view(isMyTurn: true, phase: const TrickPlayPhaseViewDto()),
+        );
+        RandomAi(_id, session, Random(0)).onChanged();
+        expect(session.commands, hasLength(1));
+        final cmd = session.commands.single as PlayCardCommandDto;
+        expect(_hand, contains(cmd.card));
+      },
+    );
 
     test('submits nothing when it is not their turn', () {
       final session = _FakeSession(
-        view: _view(isMyTurn: false, phase: const TrickPlayPhaseView()),
+        view: _view(isMyTurn: false, phase: const TrickPlayPhaseViewDto()),
       );
       RandomAi(_id, session, Random(0)).onChanged();
       expect(session.commands, isEmpty);
@@ -97,21 +100,21 @@ void main() {
       final session = _FakeSession(
         view: _view(
           isMyTurn: true,
-          phase: const TrickPlayPhaseView(),
+          phase: const TrickPlayPhaseViewDto(),
           hand: [rejected, accepted],
         ),
-        onSubmit: (cmd) => cmd is PlayCardCommand && cmd.card == rejected
+        onSubmit: (cmd) => cmd is PlayCardCommandDto && cmd.card == rejected
             ? const Rejected('must follow suit')
             : const Accepted(),
       );
       RandomAi(_id, session, Random(0)).onChanged();
-      final plays = session.commands.whereType<PlayCardCommand>().toList();
+      final plays = session.commands.whereType<PlayCardCommandDto>().toList();
       expect(plays.last.card, equals(accepted));
     });
 
     test('submits exactly one command when first card is accepted', () {
       final session = _FakeSession(
-        view: _view(isMyTurn: true, phase: const TrickPlayPhaseView()),
+        view: _view(isMyTurn: true, phase: const TrickPlayPhaseViewDto()),
       );
       RandomAi(_id, session, Random(0)).onChanged();
       expect(session.commands, hasLength(1));
@@ -119,9 +122,9 @@ void main() {
   });
 
   group('RandomAi — other phases', () {
-    test('submits nothing during AllPassPhaseView', () {
+    test('submits nothing during AllPassPhaseViewDto', () {
       final session = _FakeSession(
-        view: _view(isMyTurn: true, phase: const AllPassPhaseView()),
+        view: _view(isMyTurn: true, phase: const AllPassPhaseViewDto()),
       );
       RandomAi(_id, session, Random(0)).onChanged();
       expect(session.commands, isEmpty);

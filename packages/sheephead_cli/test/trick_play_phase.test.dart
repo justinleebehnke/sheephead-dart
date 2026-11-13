@@ -16,12 +16,12 @@ void main() {
     Card(Suit.spades, Rank.nine),
   ];
 
-  PlayerView makeView({
+  PlayerViewDto makeView({
     List<Card> hand = const [],
     Card? leftPlayed,
     Card? acrossPlayed,
     Card? rightPlayed,
-  }) => PlayerView(
+  }) => PlayerViewDto(
     id: const PlayerId(0),
     hand: hand,
     opponents: [
@@ -54,7 +54,7 @@ void main() {
       ),
     ],
     isMyTurnToAct: true,
-    phase: const TrickPlayPhaseView(),
+    phase: const TrickPlayPhaseViewDto(),
   );
 
   group('buildContent', () {
@@ -137,11 +137,11 @@ void main() {
   });
 
   group('buildContent opponent labels during trick play', () {
-    PlayerView viewWithOpponents({
+    PlayerViewDto viewWithOpponents({
       SeatedPlayer? left,
       SeatedPlayer? across,
       SeatedPlayer? right,
-    }) => PlayerView(
+    }) => PlayerViewDto(
       id: const PlayerId(0),
       hand: const [],
       opponents: [
@@ -174,7 +174,7 @@ void main() {
             ),
       ],
       isMyTurnToAct: true,
-      phase: const TrickPlayPhaseView(),
+      phase: const TrickPlayPhaseViewDto(),
     );
 
     test('does not show passed status', () {
@@ -294,16 +294,17 @@ void main() {
   group('interpret', () {
     setUp(() => phase.buildContent(makeView(hand: hand)));
 
-    test('valid number submits PlayCardCommand with the correct card', () {
+    test('valid number submits PlayCardCommandDto with the correct card', () {
       final result = phase.interpret('1');
 
       expect(result, isA<Submit>());
-      final cmd = (result as Submit).command as PlayCardCommand;
+      final cmd = (result as Submit).command as PlayCardCommandDto;
       expect(cmd.card, hand[0]);
     });
 
     test('"3" submits the third card', () {
-      final cmd = (phase.interpret('3') as Submit).command as PlayCardCommand;
+      final cmd =
+          (phase.interpret('3') as Submit).command as PlayCardCommandDto;
 
       expect(cmd.card, hand[2]);
     });

@@ -1,19 +1,19 @@
 import 'package:sheephead_engine/sheephead_engine.dart';
 
 import 'bury_selection.dart';
-import 'game_phase.dart';
+import 'game_phase.interface.dart';
 import 'parse_result.dart';
 import 'pick_phase_label.dart';
 import 'table_layout.dart';
 
-class ChopPhase with TableLayout, PickPhaseLabel implements GamePhase {
+class ChopPhase with TableLayout, PickPhaseLabel implements IGamePhase {
   ChopPhase(this._selection, this._playerId);
 
   final BurySelection _selection;
   final PlayerId _playerId;
 
   @override
-  String buildContent(PlayerView view) {
+  String buildContent(PlayerViewDto view) {
     final buffer = StringBuffer();
 
     buffer.writeln(opponentTable(view));
@@ -35,12 +35,12 @@ class ChopPhase with TableLayout, PickPhaseLabel implements GamePhase {
     switch (input.trim().toLowerCase()) {
       case 'y':
         return Submit(
-          BuryCommand(playerId: _playerId, cards: cards, chop: true),
+          BuryCommandDto(playerId: _playerId, cards: cards, chop: true),
         );
       case 'n':
       case '':
         return Submit(
-          BuryCommand(playerId: _playerId, cards: cards, chop: false),
+          BuryCommandDto(playerId: _playerId, cards: cards, chop: false),
         );
       default:
         return const Unrecognized();

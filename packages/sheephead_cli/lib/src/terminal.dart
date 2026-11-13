@@ -1,10 +1,10 @@
-import 'terminal_presenter.dart';
+import 'terminal_presenter.interface.dart';
 
 const _clearScreen = '\x1B[2J\x1B[H';
 
 class Terminal {
   Terminal(
-    TerminalPresenter presenter, {
+    ITerminalPresenter presenter, {
     required void Function(String) output,
     required Stream<String> input,
   }) {

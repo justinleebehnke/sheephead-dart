@@ -11,7 +11,7 @@ void main() {
 
   final session = SheepheadGameSession(
     GameConfig.spitzer4(),
-    Shuffler(Random()),
+    RandomShuffler(Random()),
   );
 
   final ais = [

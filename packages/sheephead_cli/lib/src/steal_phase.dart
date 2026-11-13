@@ -1,13 +1,13 @@
 import 'package:sheephead_engine/sheephead_engine.dart';
 
-import 'game_phase.dart';
+import 'game_phase.interface.dart';
 import 'parse_result.dart';
 import 'pick_phase_label.dart';
 import 'table_layout.dart';
 
-class StealPhase with TableLayout, PickPhaseLabel implements GamePhase {
+class StealPhase with TableLayout, PickPhaseLabel implements IGamePhase {
   @override
-  String buildContent(PlayerView view) {
+  String buildContent(PlayerViewDto view) {
     final buffer = StringBuffer();
 
     buffer.writeln(opponentTable(view));
@@ -27,10 +27,10 @@ class StealPhase with TableLayout, PickPhaseLabel implements GamePhase {
   ParseResult interpret(String input) {
     switch (input.trim().toLowerCase()) {
       case 'y':
-        return const Submit(StealCommand());
+        return const Submit(StealCommandDto());
       case 'n':
       case '':
-        return const Submit(DeclineStealCommand());
+        return const Submit(DeclineStealCommandDto());
       default:
         return const Unrecognized();
     }

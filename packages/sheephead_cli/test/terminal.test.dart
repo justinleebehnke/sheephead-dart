@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:sheephead_cli/src/terminal_presenter.dart';
+import 'package:sheephead_cli/src/terminal_presenter.interface.dart';
 import 'package:sheephead_cli/src/terminal.dart';
 import 'package:test/test.dart';
 
-class FakePresenter implements TerminalPresenter {
+class FakePresenter implements ITerminalPresenter {
   final _contentController = StreamController<String>();
   final List<String> linesReceived = [];
 

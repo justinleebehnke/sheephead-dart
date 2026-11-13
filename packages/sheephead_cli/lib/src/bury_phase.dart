@@ -1,12 +1,12 @@
 import 'package:sheephead_engine/sheephead_engine.dart';
 
 import 'bury_selection.dart';
-import 'game_phase.dart';
+import 'game_phase.interface.dart';
 import 'parse_result.dart';
 import 'pick_phase_label.dart';
 import 'table_layout.dart';
 
-class BuryPhase with TableLayout, PickPhaseLabel implements GamePhase {
+class BuryPhase with TableLayout, PickPhaseLabel implements IGamePhase {
   BuryPhase(this._selection, this._playerId);
 
   final BurySelection _selection;
@@ -15,9 +15,9 @@ class BuryPhase with TableLayout, PickPhaseLabel implements GamePhase {
   bool _chopAllowed = false;
 
   @override
-  String buildContent(PlayerView view) {
+  String buildContent(PlayerViewDto view) {
     _hand = view.hand;
-    _chopAllowed = (view.phase as BuryPhaseView).isChopAllowed;
+    _chopAllowed = (view.phase as BuryPhaseViewDto).isChopAllowed;
 
     final buffer = StringBuffer();
 
@@ -58,6 +58,8 @@ class BuryPhase with TableLayout, PickPhaseLabel implements GamePhase {
       return const Advance();
     }
 
-    return Submit(BuryCommand(playerId: _playerId, cards: cards, chop: false));
+    return Submit(
+      BuryCommandDto(playerId: _playerId, cards: cards, chop: false),
+    );
   }
 }

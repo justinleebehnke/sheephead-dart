@@ -1,7 +1,7 @@
 import 'package:sheephead_engine/sheephead_engine.dart';
 
 mixin TableLayout {
-  String opponentTable(PlayerView view) {
+  String opponentTable(PlayerViewDto view) {
     final left = view.opponents.firstWhere((o) => o.seat == RelativeSeat.left);
     final across = view.opponents.firstWhere(
       (o) => o.seat == RelativeSeat.across,

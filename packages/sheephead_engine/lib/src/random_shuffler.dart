@@ -1,10 +1,13 @@
 import 'dart:math';
 
-class Shuffler {
-  const Shuffler(this._random);
+import 'shuffler.interface.dart';
+
+class RandomShuffler implements IShuffler {
+  const RandomShuffler(this._random);
 
   final Random _random;
 
+  @override
   List<T> shuffle<T>(List<T> items) {
     final result = List<T>.from(items);
     for (var i = result.length - 1; i > 0; i--) {

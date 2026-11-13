@@ -9,13 +9,13 @@ void main() {
     phase = HandResultPhase();
   });
 
-  PlayerView makeView({
+  PlayerViewDto makeView({
     List<PlayerScore>? results,
     bool isIPicker = false,
     bool isIDealer = false,
     bool isIGoingAlone = false,
     bool isIPartner = false,
-  }) => PlayerView(
+  }) => PlayerViewDto(
     id: const PlayerId(0),
     hand: const [],
     opponents: const [
@@ -49,7 +49,7 @@ void main() {
     isIDealer: isIDealer,
     isIGoingAlone: isIGoingAlone,
     isIPartner: isIPartner,
-    phase: HandResultPhaseView(results: results ?? const []),
+    phase: HandResultPhaseViewDto(results: results ?? const []),
   );
 
   group('buildContent', () {

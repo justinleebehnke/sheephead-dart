@@ -1,3 +1,3 @@
-abstract interface class ScreenFrame {
+abstract interface class IScreenFrame {
   String render({required String content, String? error});
 }

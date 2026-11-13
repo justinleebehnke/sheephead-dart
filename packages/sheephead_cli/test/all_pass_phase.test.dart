@@ -9,7 +9,7 @@ void main() {
     phase = AllPassPhase();
   });
 
-  PlayerView makeView() => PlayerView(
+  PlayerViewDto makeView() => PlayerViewDto(
     id: const PlayerId(0),
     hand: const [],
     opponents: const [
@@ -39,7 +39,7 @@ void main() {
       ),
     ],
     isMyTurnToAct: false,
-    phase: const AllPassPhaseView(),
+    phase: const AllPassPhaseViewDto(),
   );
 
   group('buildContent', () {

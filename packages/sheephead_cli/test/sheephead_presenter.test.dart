@@ -91,7 +91,7 @@ void main() {
 
   group('when the session rejects the command', () {
     setUp(() {
-      phase.interpretResult = Submit(const PassCommand(PlayerId(0)));
+      phase.interpretResult = Submit(const PassCommandDto(PlayerId(0)));
       session.result = const Rejected('invalid play');
     });
 
@@ -227,7 +227,7 @@ void main() {
 
   group('when the session accepts the command', () {
     setUp(() {
-      phase.interpretResult = Submit(const PassCommand(PlayerId(0)));
+      phase.interpretResult = Submit(const PassCommandDto(PlayerId(0)));
       session.result = const Accepted();
     });
 
@@ -270,29 +270,29 @@ void main() {
 
 // --- fakes ---
 
-class _FakeGameSession implements GameSession {
-  PlayerView viewResult = const PlayerView(
+class _FakeGameSession implements IGameSession {
+  PlayerViewDto viewResult = const PlayerViewDto(
     id: PlayerId(0),
     hand: [],
     opponents: [],
     isMyTurnToAct: false,
-    phase: PickPhaseView(),
+    phase: PickPhaseViewDto(),
   );
-  CommandResult result = const Accepted();
-  Command? lastSubmitted;
-  final observers = <GameObserver>[];
+  CommandResultDto result = const Accepted();
+  CommandDto? lastSubmitted;
+  final observers = <IGameObserver>[];
 
   @override
-  void addObserver(GameObserver observer) => observers.add(observer);
+  void addObserver(IGameObserver observer) => observers.add(observer);
 
   @override
-  void removeObserver(GameObserver observer) => observers.remove(observer);
+  void removeObserver(IGameObserver observer) => observers.remove(observer);
 
   @override
-  PlayerView viewFor(PlayerId id) => viewResult;
+  PlayerViewDto viewFor(PlayerId id) => viewResult;
 
   @override
-  CommandResult submit(Command command) {
+  CommandResultDto submit(CommandDto command) {
     lastSubmitted = command;
     return result;
   }
@@ -304,7 +304,7 @@ class _FakeGameSession implements GameSession {
   }
 }
 
-class _FakeGamePhase implements GamePhase {
+class _FakeGamePhase implements IGamePhase {
   ParseResult interpretResult = const Unrecognized();
   String contentResult = '';
 
@@ -312,10 +312,10 @@ class _FakeGamePhase implements GamePhase {
   ParseResult interpret(String input) => interpretResult;
 
   @override
-  String buildContent(PlayerView view) => contentResult;
+  String buildContent(PlayerViewDto view) => contentResult;
 }
 
-class _FakeScreenFrame implements ScreenFrame {
+class _FakeScreenFrame implements IScreenFrame {
   String? lastContent;
   String? lastError;
   String Function(String content, String? error) outputFor = (content, _) =>

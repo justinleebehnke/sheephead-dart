@@ -7,7 +7,7 @@ void main() {
 
   setUp(() => phase = PickPassPhase(const PlayerId(0)));
 
-  PlayerView makeView({
+  PlayerViewDto makeView({
     List<Card> hand = const [],
     bool leftPassed = false,
     bool acrossPassed = false,
@@ -16,7 +16,7 @@ void main() {
     bool acrossDealer = false,
     bool rightDealer = false,
     bool isDoublesHand = false,
-  }) => PlayerView(
+  }) => PlayerViewDto(
     id: const PlayerId(0),
     hand: hand,
     opponents: [
@@ -47,7 +47,7 @@ void main() {
     ],
     isMyTurnToAct: true,
     isDoublesHand: isDoublesHand,
-    phase: const PickPhaseView(),
+    phase: const PickPhaseViewDto(),
   );
 
   group('buildContent', () {
@@ -175,34 +175,34 @@ void main() {
   });
 
   group('interpret', () {
-    test('"y" submits a PickCommand', () {
+    test('"y" submits a PickCommandDto', () {
       final result = phase.interpret('y');
       expect(result, isA<Submit>());
-      expect((result as Submit).command, isA<PickCommand>());
+      expect((result as Submit).command, isA<PickCommandDto>());
     });
 
-    test('"Y" submits a PickCommand', () {
+    test('"Y" submits a PickCommandDto', () {
       final result = phase.interpret('Y');
       expect(result, isA<Submit>());
-      expect((result as Submit).command, isA<PickCommand>());
+      expect((result as Submit).command, isA<PickCommandDto>());
     });
 
-    test('"n" submits a PassCommand', () {
+    test('"n" submits a PassCommandDto', () {
       final result = phase.interpret('n');
       expect(result, isA<Submit>());
-      expect((result as Submit).command, isA<PassCommand>());
+      expect((result as Submit).command, isA<PassCommandDto>());
     });
 
-    test('"N" submits a PassCommand', () {
+    test('"N" submits a PassCommandDto', () {
       final result = phase.interpret('N');
       expect(result, isA<Submit>());
-      expect((result as Submit).command, isA<PassCommand>());
+      expect((result as Submit).command, isA<PassCommandDto>());
     });
 
-    test('empty input submits a PassCommand (default)', () {
+    test('empty input submits a PassCommandDto (default)', () {
       final result = phase.interpret('');
       expect(result, isA<Submit>());
-      expect((result as Submit).command, isA<PassCommand>());
+      expect((result as Submit).command, isA<PassCommandDto>());
     });
 
     test('unrecognized input returns Unrecognized', () {

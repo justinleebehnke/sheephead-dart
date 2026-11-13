@@ -6,7 +6,7 @@ sealed class ParseResult {
 
 final class Submit extends ParseResult {
   const Submit(this.command);
-  final Command command;
+  final CommandDto command;
 }
 
 final class Advance extends ParseResult {

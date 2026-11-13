@@ -9,13 +9,13 @@ void main() {
     phase = TrickResultPhase();
   });
 
-  PlayerView makeView({
+  PlayerViewDto makeView({
     PlayerId winnerId = const PlayerId(2),
     Card myCard = const Card(Suit.clubs, Rank.queen),
     Card? leftPlayed,
     Card? acrossPlayed,
     Card? rightPlayed,
-  }) => PlayerView(
+  }) => PlayerViewDto(
     id: const PlayerId(0),
     hand: const [],
     opponents: [
@@ -48,7 +48,7 @@ void main() {
       ),
     ],
     isMyTurnToAct: false,
-    phase: TrickResultPhaseView(cardPlayed: myCard, trickWinnerId: winnerId),
+    phase: TrickResultPhaseViewDto(cardPlayed: myCard, trickWinnerId: winnerId),
   );
 
   group('buildContent', () {

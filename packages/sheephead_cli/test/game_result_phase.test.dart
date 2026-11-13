@@ -9,15 +9,15 @@ void main() {
     phase = GameResultPhase();
   });
 
-  PlayerView makeView({
+  PlayerViewDto makeView({
     List<PlayerScore> standings = const [],
     bool endedOnPassedOutHand = false,
-  }) => PlayerView(
+  }) => PlayerViewDto(
     id: const PlayerId(0),
     hand: const [],
     opponents: const [],
     isMyTurnToAct: false,
-    phase: GameResultPhaseView(
+    phase: GameResultPhaseViewDto(
       standings: standings,
       endedOnPassedOutHand: endedOnPassedOutHand,
     ),

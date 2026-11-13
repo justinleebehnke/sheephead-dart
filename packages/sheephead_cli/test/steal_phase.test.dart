@@ -9,7 +9,7 @@ void main() {
     phase = StealPhase();
   });
 
-  PlayerView makeView({List<Card> hand = const []}) => PlayerView(
+  PlayerViewDto makeView({List<Card> hand = const []}) => PlayerViewDto(
     id: const PlayerId(0),
     hand: hand,
     opponents: [
@@ -39,7 +39,7 @@ void main() {
       ),
     ],
     isMyTurnToAct: true,
-    phase: const StealPhaseView(),
+    phase: const StealPhaseViewDto(),
   );
 
   group('buildContent', () {
@@ -78,7 +78,7 @@ void main() {
   });
 
   group('buildContent opponent labels', () {
-    PlayerView viewWithAcross(SeatedPlayer across) => PlayerView(
+    PlayerViewDto viewWithAcross(SeatedPlayer across) => PlayerViewDto(
       id: const PlayerId(0),
       hand: const [],
       opponents: [
@@ -101,7 +101,7 @@ void main() {
         ),
       ],
       isMyTurnToAct: true,
-      phase: const StealPhaseView(),
+      phase: const StealPhaseViewDto(),
     );
 
     test('labels a player who declined the steal', () {
@@ -177,34 +177,34 @@ void main() {
   });
 
   group('interpret', () {
-    test('"y" submits StealCommand', () {
+    test('"y" submits StealCommandDto', () {
       expect(phase.interpret('y'), isA<Submit>());
-      expect((phase.interpret('y') as Submit).command, isA<StealCommand>());
+      expect((phase.interpret('y') as Submit).command, isA<StealCommandDto>());
     });
 
-    test('"Y" submits StealCommand', () {
-      expect((phase.interpret('Y') as Submit).command, isA<StealCommand>());
+    test('"Y" submits StealCommandDto', () {
+      expect((phase.interpret('Y') as Submit).command, isA<StealCommandDto>());
     });
 
-    test('"n" submits DeclineStealCommand', () {
+    test('"n" submits DeclineStealCommandDto', () {
       expect(phase.interpret('n'), isA<Submit>());
       expect(
         (phase.interpret('n') as Submit).command,
-        isA<DeclineStealCommand>(),
+        isA<DeclineStealCommandDto>(),
       );
     });
 
-    test('"N" submits DeclineStealCommand', () {
+    test('"N" submits DeclineStealCommandDto', () {
       expect(
         (phase.interpret('N') as Submit).command,
-        isA<DeclineStealCommand>(),
+        isA<DeclineStealCommandDto>(),
       );
     });
 
-    test('empty input submits DeclineStealCommand (default no)', () {
+    test('empty input submits DeclineStealCommandDto (default no)', () {
       expect(
         (phase.interpret('') as Submit).command,
-        isA<DeclineStealCommand>(),
+        isA<DeclineStealCommandDto>(),
       );
     });
 

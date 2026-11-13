@@ -355,6 +355,68 @@ with a terminal-playable game (King 9 style) for the **4-player Spitzer** varian
 - [ ] **A.7** *(later)* Optional in-process `EngineDriver` for fast feedback, and a
       subprocess mode for `CliDriver` that runs the real binary (production-like).
 
+---
+
+## Epic D — Decomposition behind contracts
+
+> Bring the code in line with `CLAUDE.md` "Design rules": classes depend only on
+> interfaces and DTOs, only factories construct, no mixins, DTOs are pure data,
+> 2–3 collaborators per class. Each story is a behavior-preserving refactor, one
+> small change with every gate green. Work from the leaves of the dependency
+> graph upward, so each class extracted only depends on contracts that already
+> exist. New collaborators are driven out test-first against fakes.
+
+**Safety net first**
+- [ ] **D.1** Do **A.1** (composition root, `--seed`), then add an end-to-end smoke
+      test that runs the real `main` with a fixed seed and scripted input.
+      *Done when:* the smoke test plays one full hand and fails if the wiring in
+      `main` breaks.
+
+**Engine leaves**
+- [ ] **D.2** `ITrumpEvaluator` replaces the static `TrumpEvaluator` methods
+      (Spitzer implementation, behavior unchanged). *Done when:* no code calls
+      `TrumpEvaluator.` statically. Making the evaluator config-aware stays in
+      Epic 1.
+- [ ] **D.3** `ITrickResolver` replaces static `TrickResolver.winner` and takes an
+      `ITrumpEvaluator`.
+- [ ] **D.4** `IHandScorer` takes over `_computeScores` from the session.
+- [ ] **D.5** `IDeckProvider` replaces `DeckComposition.spitzer()`.
+      *Done when:* `DeckComposition` is pure data.
+- [ ] **D.6** Strip `==`, `hashCode` and `label` from `Card`, `PlayerId`,
+      `PlayerScore` and `SeatedPlayer`. Replace them with interfaces where needed
+      (`ICardFormatter` in the CLI, a card-equality contract wherever
+      `contains`/`remove` relied on `==`) and with test matchers.
+      *Done when:* every DTO passes the pure-data definition.
+- [ ] **D.7** `IDealer` (uses `IShuffler` and `IDeckProvider`) takes over `_deal`.
+
+**Engine core**
+- [ ] **D.8** `IEventReducer`: the pure `apply(state, event)` and its four helpers
+      move out of the session.
+- [ ] **D.9** `IViewProjector` takes over `viewFor`, `_phaseFor`, `_opponent` and
+      `_isMyTurnToAct`. `deriveViewDto` leaves `player_view.dto.dart`.
+      *Done when:* that file imports no engine internals.
+- [ ] **D.10** One validator per command (pass, pick, bury, play card, steal,
+      decline steal) behind contracts (`ICardPlayRules` holds follow-suit,
+      `IBuryRules` holds the chop/J♦ rules), plus an `ICommandRouter` that
+      switches over `CommandDto`.
+- [ ] **D.11** `IGameStateStore` is the single owner of `MasterGameState`: it folds
+      events and notifies observers.
+- [ ] **D.12** `SheepheadGameSession` becomes a thin coordinator (router, store,
+      projector), and an `EngineFactory` builds the object graph.
+      *Done when:* the session constructs nothing.
+
+**CLI**
+- [ ] **D.13** Replace the `TableLayout`, `PickPhaseLabel` and `TrickPhaseLabel`
+      mixins with injected `ITableRenderer` and `IPhaseLabel` delegates.
+- [ ] **D.14** `IGamePhaseFactory` replaces `selectPhase` and is injected into the
+      presenter.
+- [ ] **D.15** `IBurySelection`: one owner gates the pending bury choice, replacing
+      the mutable `BurySelection` bag shared through `main`.
+- [ ] **D.16** `CliFactory` builds the CLI graph. `main` shrinks to parsing flags,
+      calling the factories and starting the terminal, kept humble and covered
+      by D.1. *Done when:* the class map shows no concrete dependencies outside
+      factories and `main`.
+
 ## Notes / parking lot
 
 ### Per-player UI preferences (tabled, not in scope yet)

@@ -1,6 +1,6 @@
-import 'screen_frame.dart';
+import 'screen_frame.interface.dart';
 
-class AnsiScreenFrame implements ScreenFrame {
+class AnsiScreenFrame implements IScreenFrame {
   @override
   String render({required String content, String? error}) {
     if (error == null) return content;

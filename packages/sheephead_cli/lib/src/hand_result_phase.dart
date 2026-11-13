@@ -1,19 +1,19 @@
 import 'package:sheephead_engine/sheephead_engine.dart';
 
-import 'game_phase.dart';
+import 'game_phase.interface.dart';
 import 'parse_result.dart';
 import 'table_layout.dart';
 import 'trick_phase_label.dart';
 
-class HandResultPhase with TableLayout, TrickPhaseLabel implements GamePhase {
+class HandResultPhase with TableLayout, TrickPhaseLabel implements IGamePhase {
   @override
-  String buildContent(PlayerView view) {
+  String buildContent(PlayerViewDto view) {
     final buffer = StringBuffer();
 
     buffer.writeln(center('Hand Result'));
     buffer.writeln();
 
-    final results = (view.phase as HandResultPhaseView).results;
+    final results = (view.phase as HandResultPhaseViewDto).results;
     if (results.isNotEmpty) {
       final labels = results
           .map(
@@ -46,7 +46,7 @@ class HandResultPhase with TableLayout, TrickPhaseLabel implements GamePhase {
     return const Unrecognized();
   }
 
-  String _selfLabel(PlayerView view) {
+  String _selfLabel(PlayerViewDto view) {
     final buf = StringBuffer('Player ${view.id.value}');
     if (view.isIDealer) buf.write(' (D)');
     if (view.isIPicker) {

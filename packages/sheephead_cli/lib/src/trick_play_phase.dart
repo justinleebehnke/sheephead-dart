@@ -1,18 +1,18 @@
 import 'package:sheephead_engine/sheephead_engine.dart';
 
-import 'game_phase.dart';
+import 'game_phase.interface.dart';
 import 'parse_result.dart';
 import 'table_layout.dart';
 import 'trick_phase_label.dart';
 
-class TrickPlayPhase with TableLayout, TrickPhaseLabel implements GamePhase {
+class TrickPlayPhase with TableLayout, TrickPhaseLabel implements IGamePhase {
   TrickPlayPhase(this._playerId);
 
   final PlayerId _playerId;
   List<Card> _hand = [];
 
   @override
-  String buildContent(PlayerView view) {
+  String buildContent(PlayerViewDto view) {
     _hand = view.hand;
 
     final buffer = StringBuffer();
@@ -40,6 +40,6 @@ class TrickPlayPhase with TableLayout, TrickPhaseLabel implements GamePhase {
     final n = int.tryParse(input.trim());
     if (n == null) return const Unrecognized();
     if (n < 1 || n > _hand.length) return const Unrecognized();
-    return Submit(PlayCardCommand(playerId: _playerId, card: _hand[n - 1]));
+    return Submit(PlayCardCommandDto(playerId: _playerId, card: _hand[n - 1]));
   }
 }
